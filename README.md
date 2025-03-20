@@ -1,136 +1,178 @@
-# Invoice App
+# Amber Backend
 
-An Invoice Management Application built using Express.js, MongoDB, and TypeScript. This application allows users to manage clients, products, and invoices, providing a seamless experience for small to medium-sized businesses to automate their invoicing process.
+Amber Backend is the server-side application for the Amber project, built with **Node.js**, **Express**, and **TypeScript**. It provides authentication, user management, email notifications, and other core functionalities.
 
-# Documentation
+## ✨ Features
+
+- User authentication (Login, Register, Password Reset)
+- Profile management (Upload profile pictures)
+- Email notifications (Verification & Password Reset)
+- Secure API endpoints with validation & middleware
+- File uploads using **Multer** and **Cloudinary**
+- JSON Web Token (JWT) authentication
+
+---
+
+## 📺 Tech Stack
+
+- **Node.js** & **Express.js** – Backend framework
+- **TypeScript** – Typed JavaScript for reliability
+- **MongoDB** & **Mongoose** – Database & ORM
+- **Cloudinary** – File uploads
+- **Multer** – File handling middleware
+- **Nodemailer** – Email sending
+- **Zod** – Request validation
+- **Husky & Lint-Staged** – Pre-commit hooks for code quality
+
+---
+
+## 💂️ Project Structure
 
 ```
-https://documenter.getpostman.com/view/17301223/2sA3s6DpEs
+amber-backend
+│—— src/
+│   ├—— config/           # Configuration files (DB, Environment variables)
+│   ├—— controllers/      # Route handlers
+│   ├—— errors/           # Custom error handlers
+│   ├—— middlewares/      # Authentication & validation middleware
+│   ├—— models/           # Mongoose models
+│   ├—— routes/           # API routes
+│   ├—— services/         # Business logic & integrations
+│   │   ├—— nodemailer/   # Email service
+│   ├—— validations/      # Input validation schemas
+│   └—— index.ts          # Main entry point
+│—— .env                  # Environment variables
+│—— package.json          # Dependencies & scripts
+│—— tsconfig.json         # TypeScript config
+│—— README.md             # Project documentation
 ```
 
-## Table of Contents
+---
 
-- [Invoice App](#invoice-app)
-- [Documentation](#documentation)
-  - [Table of Contents](#table-of-contents)
-  - [Features](#features)
-  - [Technologies Used](#technologies-used)
-  - [Installation](#installation)
-  - [Usage](#usage)
-  - [Project Structure](#project-structure)
-  - [API Endpoints](#api-endpoints)
-    - [Clients](#clients)
-    - [Products](#products)
-    - [Invoices](#invoices)
-    - [Users](#users)
+## 🚀 Getting Started
 
-## Features
+### 1️⃣ Clone the Repository
 
-- **Client Management**: Create, read, update, and delete client records.
-- **Product Management**: Manage products with the ability to upload images.
-- **Invoice Management**: Generate and manage invoices for different clients.
-- **Authentication**: Secure routes with JWT authentication.
-- **Validation**: Request validation using express-validator.
-- **File Uploads**: Handle file uploads using Multer and Cloudinary.
-- **Email Notifications**: Send invoice notifications via email using Nodemailer.
+```bash
+git clone https://github.com/sanite1/amber-backend.git
+cd amber-backend
+```
 
-## Technologies Used
+### 2️⃣ Install Dependencies
 
-- **Backend**: Node.js, Express.js
-- **Database**: MongoDB, Mongoose
-- **Authentication**: JSON Web Tokens (JWT)
-- **File Storage**: Multer, Cloudinary
-- **Validation**: express-validation, express-validator
-- **Email**: Nodemailer
+Using **npm**:
 
-## Installation
+```bash
+npm install
+```
 
-1. Clone the repository:
+Using **pnpm**:
+
+```bash
+pnpm install
+```
+
+### 3️⃣ Set Up Environment Variables
+
+Create a `.env` file and add the following:
+
+```env
+PORT=5000
+MONGO_URI=your_mongodb_connection_string
+JWT_SECRET=your_secret_key
+AUTH_EMAIL=your_email@example.com
+AUTH_PASS=your_email_password
+CLOUDINARY_API_KEY=your_cloudinary_key
+CLOUDINARY_SECRET=your_cloudinary_secret
+CLOUDINARY_CLOUD_NAME=your_cloudinary_name
+```
+
+### 4️⃣ Run the Server
+
+For development:
+
+```bash
+npm run dev
+```
+
+For production:
+
+```bash
+npm run build && npm start
+```
+
+---
+
+## 🐐 API Endpoints
+
+### 📝 Authentication
+
+| Method | Endpoint                     | Description     | Protected |
+| ------ | ---------------------------- | --------------- | --------- |
+| POST   | `/api/login`                 | Login User      | ❌        |
+| POST   | `/api/register`              | Register User   | ❌        |
+| POST   | `/api/forgot-password`       | Forgot Password | ❌        |
+| PATCH  | `/api/reset-password/:token` | Reset Password  | ❌        |
+
+### 👤 User Management
+
+| Method | Endpoint                         | Description         | Protected |
+| ------ | -------------------------------- | ------------------- | --------- |
+| GET    | `/api/users/:id`                 | Get User by ID      | ✅        |
+| PATCH  | `/api/users/:id`                 | Update User Profile | ✅        |
+| PATCH  | `/api/users/update-password/:id` | Update Password     | ✅        |
+
+---
+
+## 🛠️ Development Tools
+
+### ✨ Code Formatting & Linting
+
+Run ESLint to check code quality:
+
+```bash
+npm run lint
+```
+
+Format code with Prettier:
+
+```bash
+npm run format
+```
+
+### 🔍 Pre-commit Hooks
+
+Husky is set up to run `lint-staged` before commits.
+
+```bash
+npx husky install
+```
+
+---
+
+## 📌 Deployment
+
+1. Build the project:
+
    ```bash
-   git clone https://github.com/yourusername/invoice-app.git
-   ```
-2. Navigate to the project directory:
-   ```bash
-   cd invoice-app
-   ```
-3. Create a `.env` file in the root directory and configure your environment variables:
-
-   ```bash
-   MONGODB_URI=your_mongodb_connection_string
-   JWT_SECRET=your_jwt_secret
-   CLOUDINARY_URL=your_cloudinary_url
-   CLOUD_NAME=your-cloud_name
-   CLOUDINARY_API_KEY=your_cloudinary_apikey
-   CLOUDINARY_API_SECRET=your_cloudinary_apisecret
-   AUTH_EMAIL=your_gmail
-   AUTH_PASS=your_gmail_api_key
-   JWT_SECRET=your_jwt_secret
-   DOMAIN_NAME=https://example.com
-
+   npm run build
    ```
 
-4. Build the project:
+2. Deploy using **Vercel**, **Railway**, or **Docker**.
 
-   ```bash
-   pnpm run build
-   ```
+---
 
-5. Start the development server:
+## 💡 Contributions
 
-   ```bash
-   pnpm run dev
-   ```
+Feel free to submit issues and pull requests!
 
-## Usage
+1. Fork the repo.
+2. Create a feature branch (`feat-new-feature`).
+3. Commit your changes.
+4. Submit a pull request.
 
-- Access the API endpoints using a tool like Postman or integrate with a frontend application.
-- Authentication is required for most endpoints. Obtain a token by logging in or creating a new user.
+---
 
-## Project Structure
+## 📄 License
 
-- `/src`: Contains all source code files.
-  - `/controllers`: Contains controller files for handling requests.
-  - `/models`: Contains Mongoose models.
-  - `/routes`: Contains Express routes.
-  - `/middlewares`: Contains custom middleware for authentication and the global error handler.
-  - `/errors`: Contains custom error classes.
-  - `/interfaces`: Contains custom interfaces.
-  - `/servicies`: Contains custom functions.
-  - `/validations`: Contains validation rules for different routes.
-  - `/config`: Configuration files for the application. -`index.ts`: Main entry point
-
-## API Endpoints
-
-### Clients
-
-- `GET /clients`: Get all clients.
-- `POST /clients`: Create a new client.
-- `GET /clients/:id`: Get a client by ID.
-- `PATCH /clients/:id`: Update a client by ID.
-- `DELETE /clients/:id`: Delete a client by ID.
-
-### Products
-
-- `GET /products`: Get all products.
-- `POST /products`: Create a new product.
-- `GET /products/:id`: Get a product by ID.
-- `PATCH /products/:id`: Update a product by ID.
-- `DELETE /products/:id`: Delete a product by ID.
-
-### Invoices
-
-- `GET /invoices`: Get all invoices.
-- `POST /invoices`: Create a new invoice.
-- `GET /invoices/:id`: Get an invoice by ID.
-- `PATCH /invoices/:id`: Update an invoice by ID.
-- `DELETE /invoices/:id`: Delete an invoice by ID.
-
-### Users
-
-- `POST /users`: Create a new user.
-- `POST /users/login`: User login.
-- `GET /users/:id`: Get a user by ID.
-- `PATCH /users/:id`: Update a user by ID.
-- `POST /users/forgot-password`: Request password reset.
-- `PATCH /users/reset-password/:id/:token`: Reset password.
-- `PATCH /users/update-password/:id`: Update password.
+This project is licensed under the **MIT License**.
