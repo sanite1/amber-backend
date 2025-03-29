@@ -8,9 +8,7 @@ const createUserSchema = {
     email: Joi.string().email().required(),
     phoneNumber: Joi.string().required(),
     password: Joi.string().min(6).required(), // Minimum length for security
-    role: Joi.string()
-      .valid("admin", "instructor", "student")
-      .default("student"),
+    role: Joi.string().valid("admin", "tutor", "student").default("student"),
     profilePicture: Joi.string().uri().optional(), // Must be a valid URL
     isVerified: Joi.boolean().default(false),
     isActive: Joi.boolean().default(true),
@@ -22,7 +20,7 @@ const updateUserSchema = {
     firstname: Joi.string().min(2),
     lastname: Joi.string(),
     phoneNumber: Joi.string(),
-    role: Joi.string().valid("admin", "instructor", "student"),
+    role: Joi.string().valid("admin", "tutor", "student"),
     profilePicture: Joi.string().uri(),
     isVerified: Joi.boolean(),
     isActive: Joi.boolean(),

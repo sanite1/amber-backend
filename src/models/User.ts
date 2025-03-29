@@ -17,7 +17,7 @@ const userSchema = new Schema<IUser>(
     password: { type: String, required: true },
     role: {
       type: String,
-      enum: ["admin", "instructor", "student"],
+      enum: ["admin", "tutor", "student"],
       default: "student",
     },
     verified: { type: Boolean, default: false },

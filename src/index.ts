@@ -6,7 +6,8 @@ import { connectDb } from "./config/db";
 import { globalErrorHandler } from "./middlewares/globalErrorHandler";
 import ApiError from "./errors/apiError";
 import userRoutes from "./routes/user.routes";
-
+import reviewRoutes from "./routes/reviews.routes";
+import notificationRoutes from "./routes/notification.routes";
 const PORT = 4000;
 
 const app = express();
@@ -21,7 +22,10 @@ app.use(cors(corsOption));
 
 connectDb();
 
-app.use("/api/users", userRoutes);
+//Routes
+app.use("/api/users", userRoutes); //Add users routes
+app.use("/api/reviews", reviewRoutes); //Add reviews routes
+app.use("/api/notifications", notificationRoutes); //Add notification routes
 
 app.listen(PORT, () => {
   console.log("Server Listening on port 4000...");

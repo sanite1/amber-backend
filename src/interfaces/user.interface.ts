@@ -6,7 +6,7 @@ export interface CreateUserRequest {
   email: string;
   phoneNumber: string;
   password: string;
-  role?: "admin" | "instructor" | "student"; // Defaults to "student"
+  role?: "admin" | "tutor" | "student"; // Defaults to "student"
   profilePicture?: string; // Optional field
   isVerified?: boolean; // Defaults to false
   isActive?: boolean; // Defaults to true
@@ -46,7 +46,7 @@ export interface IUser extends Document {
   phoneNumber: string;
   profilePicture?: string;
   password: string; // Hashed password
-  role: "admin" | "instructor" | "student"; // User role
+  role: "admin" | "tutor" | "student"; // User role
   verified: boolean; // Email verification status
   isActive: boolean; // Account activation status
   verificationToken?: string;
