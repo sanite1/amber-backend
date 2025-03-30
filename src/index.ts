@@ -8,6 +8,8 @@ import ApiError from "./errors/apiError";
 import userRoutes from "./routes/user.routes";
 import reviewRoutes from "./routes/reviews.routes";
 import notificationRoutes from "./routes/notification.routes";
+import availabilityRoutes from "./routes/availability.routes";
+
 const PORT = 4000;
 
 const app = express();
@@ -23,9 +25,10 @@ app.use(cors(corsOption));
 connectDb();
 
 //Routes
-app.use("/api/users", userRoutes); //Add users routes
-app.use("/api/reviews", reviewRoutes); //Add reviews routes
-app.use("/api/notifications", notificationRoutes); //Add notification routes
+app.use("/api/users", userRoutes);
+app.use("/api/reviews", reviewRoutes);
+app.use("/api/notifications", notificationRoutes);
+app.use("/api/availability", availabilityRoutes);
 
 app.listen(PORT, () => {
   console.log("Server Listening on port 4000...");
