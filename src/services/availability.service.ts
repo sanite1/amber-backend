@@ -24,6 +24,7 @@ const generate30MinSlots = (
     slots.push({
       dateStart: currentTime.toISOString(),
       dateEnd: slotEnd.toISOString(),
+      status: "free",
     });
 
     currentTime = slotEnd;

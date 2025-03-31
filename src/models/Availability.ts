@@ -26,6 +26,7 @@ const timeForBookingSchema = new Schema(
   {
     dateStart: { type: Date, required: true },
     dateEnd: { type: Date, required: true },
+    status: { type: String, required: true },
   },
   { _id: false },
 );
