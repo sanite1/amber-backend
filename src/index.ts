@@ -9,6 +9,7 @@ import userRoutes from "./routes/user.routes";
 import reviewRoutes from "./routes/reviews.routes";
 import notificationRoutes from "./routes/notification.routes";
 import availabilityRoutes from "./routes/availability.routes";
+import lessonRoutes from "./routes/lesson.routes";
 
 const PORT = 4000;
 
@@ -29,6 +30,7 @@ app.use("/api/users", userRoutes);
 app.use("/api/reviews", reviewRoutes);
 app.use("/api/notifications", notificationRoutes);
 app.use("/api/availability", availabilityRoutes);
+app.use("/api/lessons", lessonRoutes);
 
 app.listen(PORT, () => {
   console.log("Server Listening on port 4000...");
