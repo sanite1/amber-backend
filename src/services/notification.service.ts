@@ -4,9 +4,12 @@ import { INotification } from "../interfaces/notification.interface";
 import { Types } from "mongoose";
 import { createNotification } from "../controllers/notification.controller";
 import User from "../models/User";
+import { sendNotificationMail } from "./nodemailer/mail.service";
 
 //Create a new notification
-export const createNotificationService = async (data: INotification) => {
+export const createNotificationService = async (
+  data: Partial<INotification>,
+) => {
   const { userId, type, message, lessonId, assignmentId, eventId } = data;
   const user = await User.findById(userId);
   if (!user) {
@@ -23,6 +26,7 @@ export const createNotificationService = async (data: INotification) => {
   } else if (type === "event" && eventId) {
     notificationData.eventId = eventId;
   }
+  await sendNotificationMail(user, message as string);
   return await Notification.create(notificationData);
 };
 
