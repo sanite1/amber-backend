@@ -1,6 +1,15 @@
 import { Schema, model } from "mongoose";
 import { IUser } from "../interfaces/user.interface";
 
+const CertificationSchema = new Schema(
+  {
+    name: { type: String, required: true },
+    issuedBy: { type: String, required: true },
+    year: { type: String, required: true },
+  },
+  { _id: false }
+);
+
 const userSchema = new Schema<IUser>(
   {
     firstname: { type: String, required: true, trim: true },
@@ -25,6 +34,15 @@ const userSchema = new Schema<IUser>(
     verificationToken: { type: String },
     resetToken: { type: String },
     resetTokenExpires: { type: Date },
+    timezone: { type: String },
+    languages: { type: [String] },
+    bio: { type: String },
+    ratings: { type: String },
+    totalLessons: { type: Number },
+    numberOfReviews: { type: Number },
+    hourlyRate: { type: Number },
+    yearsOfExprience: { type: Number },
+    certifications: { type: [CertificationSchema], default: [] },
   },
   {
     timestamps: true,
@@ -35,7 +53,7 @@ const userSchema = new Schema<IUser>(
         delete ret.verificationToken;
       },
     },
-  },
+  }
 );
 
 const User = model("User", userSchema);
