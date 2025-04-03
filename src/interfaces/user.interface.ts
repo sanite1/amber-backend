@@ -37,6 +37,11 @@ export interface IPasswordReset {
   newPassword: string;
   confirmNewPassword: string;
 }
+export interface ICertification {
+  name: string;
+  issuedBy: string;
+  year: string;
+}
 
 export interface IUser extends Document {
   _id: Types.ObjectId;
@@ -52,6 +57,15 @@ export interface IUser extends Document {
   verificationToken?: string;
   resetToken?: string;
   resetTokenExpires?: Date;
+  timezone?: string;
+  languages?: string[];
+  bio?: string;
+  ratings?: string;
+  totalLessons?: number;
+  numberOfReviews?: number;
+  hourlyRate?: number;
+  yearsOfExprience?: number;
+  certifications?: ICertification[];
   createdAt: Date;
   updatedAt: Date;
 }
