@@ -21,7 +21,7 @@ const createUserSchema = {
       is: "tutor",
       then: Joi.required(),
     }),
-    yearsOfExprience: Joi.number().when("role", {
+    yearsOfExperience: Joi.number().when("role", {
       is: "tutor",
       then: Joi.required(),
     }),
@@ -50,7 +50,7 @@ const updateUserSchema = {
     languages: Joi.array().items(Joi.string()).optional(),
     bio: Joi.string().optional(),
     hourlyRate: Joi.number().optional(),
-    yearsOfExprience: Joi.number().optional(),
+    yearsOfExperience: Joi.number().optional(),
     certifications: Joi.array()
       .items(
         Joi.object({

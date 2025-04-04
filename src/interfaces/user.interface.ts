@@ -64,7 +64,7 @@ export interface IUser extends Document {
   totalLessons?: number;
   numberOfReviews?: number;
   hourlyRate?: number;
-  yearsOfExprience?: number;
+  yearsOfExperience?: number;
   certifications?: ICertification[];
   createdAt: Date;
   updatedAt: Date;

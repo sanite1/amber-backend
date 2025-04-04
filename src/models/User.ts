@@ -41,7 +41,7 @@ const userSchema = new Schema<IUser>(
     totalLessons: { type: Number },
     numberOfReviews: { type: Number },
     hourlyRate: { type: Number },
-    yearsOfExprience: { type: Number },
+    yearsOfExperience: { type: Number },
     certifications: { type: [CertificationSchema], default: [] },
   },
   {
