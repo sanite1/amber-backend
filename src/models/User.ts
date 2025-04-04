@@ -7,7 +7,7 @@ const CertificationSchema = new Schema(
     issuedBy: { type: String, required: true },
     year: { type: String, required: true },
   },
-  { _id: false }
+  { _id: false },
 );
 
 const userSchema = new Schema<IUser>(
@@ -53,7 +53,7 @@ const userSchema = new Schema<IUser>(
         delete ret.verificationToken;
       },
     },
-  }
+  },
 );
 
 const User = model("User", userSchema);
