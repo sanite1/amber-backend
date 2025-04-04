@@ -17,15 +17,6 @@ const createUserSchema = {
       .items(Joi.string())
       .when("role", { is: "tutor", then: Joi.required() }),
     bio: Joi.string().when("role", { is: "tutor", then: Joi.required() }),
-    ratings: Joi.number().when("role", { is: "tutor", then: Joi.required() }),
-    totalLessons: Joi.number().when("role", {
-      is: "tutor",
-      then: Joi.required(),
-    }),
-    numberOfReviews: Joi.number().when("role", {
-      is: "tutor",
-      then: Joi.required(),
-    }),
     hourlyRate: Joi.number().when("role", {
       is: "tutor",
       then: Joi.required(),
@@ -40,9 +31,8 @@ const createUserSchema = {
           name: Joi.string().required(),
           issuedBy: Joi.string().required(),
           year: Joi.string().required(),
-        })
+        }),
       )
-
       .when("role", { is: "tutor", then: Joi.required() }),
   }),
 };
@@ -59,9 +49,6 @@ const updateUserSchema = {
     timezone: Joi.string().optional(),
     languages: Joi.array().items(Joi.string()).optional(),
     bio: Joi.string().optional(),
-    ratings: Joi.string().optional(),
-    totalLessons: Joi.number().optional(),
-    numberOfReviews: Joi.number().optional(),
     hourlyRate: Joi.number().optional(),
     yearsOfExprience: Joi.number().optional(),
     certifications: Joi.array()
@@ -70,7 +57,7 @@ const updateUserSchema = {
           name: Joi.string().required(),
           issuedBy: Joi.string().required(),
           year: Joi.string().required(),
-        })
+        }),
       )
       .optional(),
   }),
@@ -189,7 +176,7 @@ export const forgotPasswordValidation = () => {
   return validate(
     forgotPasswodSchema,
     { context: true },
-    { abortEarly: false }
+    { abortEarly: false },
   );
 };
 
@@ -201,7 +188,7 @@ export const resetPassswordValidation = () => {
   return validate(
     resetPasswordSchema,
     { context: true },
-    { abortEarly: false }
+    { abortEarly: false },
   );
 };
 
@@ -209,6 +196,6 @@ export const updatePassswordValidation = () => {
   return validate(
     updatePasswordSchema,
     { context: true },
-    { abortEarly: false }
+    { abortEarly: false },
   );
 };
