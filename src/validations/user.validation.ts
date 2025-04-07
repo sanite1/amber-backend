@@ -1,5 +1,24 @@
+import { NextFunction, Request, Response } from "express";
 import { Joi, validate } from "express-validation";
 import { Types } from "mongoose";
+
+export function parseJsonFields(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) {
+  try {
+    if (typeof req.body.languages === "string") {
+      req.body.languages = JSON.parse(req.body.languages);
+    }
+    if (typeof req.body.certifications === "string") {
+      req.body.certifications = JSON.parse(req.body.certifications);
+    }
+    next();
+  } catch (error) {
+    return res.status(400).json({ message: "Invalid JSON in fields" });
+  }
+}
 
 const createUserSchema = {
   body: Joi.object({
