@@ -49,6 +49,7 @@ router
   .patch(
     isAuthenticated,
     upload.fields([{ name: "profilePicture", maxCount: 1 }]),
+    parseJsonFields,
     updateUserValidation(),
     updateUser,
   );
