@@ -8,5 +8,5 @@ export interface INotification extends Document {
   lessonId?: mongoose.Types.ObjectId;
   assignmentId?: mongoose.Types.ObjectId;
   eventId?: mongoose.Types.ObjectId;
-  createdAt: Date;
+  createdAt?: Date;
 }

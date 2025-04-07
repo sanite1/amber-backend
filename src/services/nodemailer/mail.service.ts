@@ -76,3 +76,22 @@ export const sendInvoiceMail = async (
     throw new ApiError(500, "Error Sending email");
   }
 };
+
+export const sendNotificationMail = async (user: IUser, message: string) => {
+  const mailOptions = {
+    from: `"Amber Training"<${process.env.AUTH_EMAIL}>`,
+    to: user.email,
+    template: "./notification",
+    subject: "New Notification from Amber Training",
+    context: {
+      name: user.lastname,
+      email: user.email,
+      message,
+    },
+  };
+  try {
+    await transporter.sendMail(mailOptions);
+  } catch (error) {
+    throw new ApiError(500, `Error sending notification email:${error}`);
+  }
+};

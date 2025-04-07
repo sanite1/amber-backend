@@ -23,7 +23,7 @@ router.post(
   createNotification,
 );
 
-//Get all the notification for the authenticatied
+//Get all the notification for the user
 router.get(
   "/:userId",
   isAuthenticated,
