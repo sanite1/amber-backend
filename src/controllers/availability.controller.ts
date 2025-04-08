@@ -51,7 +51,7 @@ export const getAvailability = async (
     const existingAvailability = await TutorAvailability.findOne({ tutorId });
 
     if (!existingAvailability) {
-      throw new ApiResponse(201, "Availability does not exist for this tutor.");
+      throw new ApiResponse(201, "Availability does not exist for this tutor");
     }
 
     // Call the service to get availability
