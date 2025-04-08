@@ -94,7 +94,7 @@ export const createTutorAvailabilityService = async (
 export const getTutorAvailabilityService = async (params: IdParam) => {
   const availability = await TutorAvailability.findOne({ tutorId: params.id });
   if (!availability) {
-    throw new ApiError(400, `Availability not found`);
+    throw new ApiResponse(201, `Availability not found`);
   }
   return new ApiResponse(200, "Availability Found", availability);
 };
