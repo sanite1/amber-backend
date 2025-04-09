@@ -45,6 +45,8 @@ router
   .route("/send-email")
   .post(upload.single("invoice"), sendEmailValidation(), sendEmailToClient);
 
+router.get("/tutors", isAuthenticated, getTutorsValidation(), getTutors);
+
 router
   .route("/:id")
   .get(isAuthenticated, getUserByIdValidation(), getUserById)
@@ -75,7 +77,5 @@ router.patch(
   updatePassswordValidation(),
   updatePassword,
 );
-
-router.get("/tutors", isAuthenticated, getTutors);
 
 export default router;
