@@ -174,16 +174,6 @@ const sendEmailSchema = {
 };
 
 const getTutorsSchema = {
-  params: Joi.object({
-    adminId: Joi.string()
-      .custom((value, helpers) => {
-        if (!Types.ObjectId.isValid(value)) {
-          return helpers.error("any.invalid");
-        }
-        return value;
-      }, "ObjectId validation")
-      .required(),
-  }),
   query: Joi.object({
     isActive: Joi.string().valid("true", "false").optional(),
     verified: Joi.string().valid("true", "false").optional(),
