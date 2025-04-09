@@ -1,5 +1,24 @@
+import { NextFunction, Request, Response } from "express";
 import { Joi, validate } from "express-validation";
 import { Types } from "mongoose";
+
+export function parseJsonFields(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) {
+  try {
+    if (typeof req.body.languages === "string") {
+      req.body.languages = JSON.parse(req.body.languages);
+    }
+    if (typeof req.body.certifications === "string") {
+      req.body.certifications = JSON.parse(req.body.certifications);
+    }
+    next();
+  } catch (error) {
+    return res.status(400).json({ message: "Invalid JSON in fields" });
+  }
+}
 
 const createUserSchema = {
   body: Joi.object({
@@ -12,6 +31,28 @@ const createUserSchema = {
     profilePicture: Joi.string().uri().optional(), // Must be a valid URL
     isVerified: Joi.boolean().default(false),
     isActive: Joi.boolean().default(true),
+    timezone: Joi.string().optional(),
+    languages: Joi.array()
+      .items(Joi.string())
+      .when("role", { is: "tutor", then: Joi.required() }),
+    bio: Joi.string().when("role", { is: "tutor", then: Joi.required() }),
+    hourlyRate: Joi.number().when("role", {
+      is: "tutor",
+      then: Joi.required(),
+    }),
+    yearsOfExperience: Joi.number().when("role", {
+      is: "tutor",
+      then: Joi.required(),
+    }),
+    certifications: Joi.array()
+      .items(
+        Joi.object({
+          name: Joi.string().required(),
+          issuedBy: Joi.string().required(),
+          year: Joi.string().required(),
+        }),
+      )
+      .when("role", { is: "tutor", then: Joi.required() }),
   }),
 };
 
@@ -24,6 +65,20 @@ const updateUserSchema = {
     profilePicture: Joi.string().uri(),
     isVerified: Joi.boolean(),
     isActive: Joi.boolean(),
+    timezone: Joi.string().optional(),
+    languages: Joi.array().items(Joi.string()).optional(),
+    bio: Joi.string().optional(),
+    hourlyRate: Joi.number().optional(),
+    yearsOfExperience: Joi.number().optional(),
+    certifications: Joi.array()
+      .items(
+        Joi.object({
+          name: Joi.string().required(),
+          issuedBy: Joi.string().required(),
+          year: Joi.string().required(),
+        }),
+      )
+      .optional(),
   }),
   params: Joi.object({
     id: Joi.string()

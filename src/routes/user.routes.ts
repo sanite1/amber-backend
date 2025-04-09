@@ -3,6 +3,7 @@ import {
   forgotPasswordValidation,
   getUserByIdValidation,
   loginUserValidation,
+  parseJsonFields,
   refreshTokenValidation,
   resetPassswordValidation,
   sendEmailValidation,
@@ -33,6 +34,7 @@ router
   .route("/")
   .post(
     upload.fields([{ name: "profilePicture", maxCount: 1 }]),
+    parseJsonFields,
     createUserValidation(),
     createUser,
   );
@@ -47,6 +49,7 @@ router
   .patch(
     isAuthenticated,
     upload.fields([{ name: "profilePicture", maxCount: 1 }]),
+    parseJsonFields,
     updateUserValidation(),
     updateUser,
   );

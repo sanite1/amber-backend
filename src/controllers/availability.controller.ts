@@ -7,6 +7,7 @@ import {
   updateTutorAvailabilityService,
 } from "../services/availability.service";
 import { IdParam } from "../interfaces/helper.interface";
+import ApiResponse from "../errors/apiResponse";
 
 export const createAvailability = async (
   req: Request,
@@ -50,7 +51,7 @@ export const getAvailability = async (
     const existingAvailability = await TutorAvailability.findOne({ tutorId });
 
     if (!existingAvailability) {
-      throw new ApiError(400, "Availability does not exist for this tutor.");
+      throw new ApiResponse(201, "Availability does not exist for this tutor");
     }
 
     // Call the service to get availability
