@@ -172,6 +172,24 @@ const sendEmailSchema = {
     user: Joi.string().email().required(),
   }),
 };
+
+const getTutorsSchema = {
+  params: Joi.object({
+    adminId: Joi.string()
+      .custom((value, helpers) => {
+        if (!Types.ObjectId.isValid(value)) {
+          return helpers.error("any.invalid");
+        }
+        return value;
+      }, "ObjectId validation")
+      .required(),
+  }),
+  query: Joi.object({
+    isActive: Joi.string().valid("true", "false").optional(),
+    verified: Joi.string().valid("true", "false").optional(),
+  }),
+};
+
 export const createUserValidation = () => {
   return validate(createUserSchema, { context: true }, { abortEarly: false });
 };
@@ -217,4 +235,8 @@ export const updatePassswordValidation = () => {
     { context: true },
     { abortEarly: false },
   );
+};
+
+export const getTutorsValidation = () => {
+  return validate(getTutorsSchema, { context: true }, { abortEarly: false });
 };
