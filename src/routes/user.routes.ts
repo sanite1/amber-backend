@@ -1,6 +1,7 @@
 import {
   createUserValidation,
   forgotPasswordValidation,
+  getTutorsValidation,
   getUserByIdValidation,
   loginUserValidation,
   parseJsonFields,
@@ -15,6 +16,7 @@ import { Router } from "express";
 import {
   createUser,
   forgotPassword,
+  getTutors,
   getUserById,
   login,
   refresh,
@@ -73,4 +75,7 @@ router.patch(
   updatePassswordValidation(),
   updatePassword,
 );
+
+router.get("/tutors", isAuthenticated, getTutorsValidation(), getTutors);
+
 export default router;
