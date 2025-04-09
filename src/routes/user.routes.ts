@@ -76,6 +76,6 @@ router.patch(
   updatePassword,
 );
 
-router.get("/tutors", isAuthenticated, getTutorsValidation(), getTutors);
+router.get("/tutors", isAuthenticated, getTutors);
 
 export default router;
