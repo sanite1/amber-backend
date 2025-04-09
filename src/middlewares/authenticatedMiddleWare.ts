@@ -1,8 +1,9 @@
 import jwt, { JwtPayload } from "jsonwebtoken";
 import ApiError from "../errors/apiError";
 import { ExpresFunction } from "../interfaces/helper.interface";
-import { Request } from "express";
+import { NextFunction, Request } from "express";
 import { Types } from "mongoose";
+import User from "../models/User";
 
 export interface IUserDecoded extends JwtPayload {
   id: Types.ObjectId;
@@ -10,6 +11,7 @@ export interface IUserDecoded extends JwtPayload {
   lastname: string;
   email: string;
   profilePicture: string;
+  //role:string;
 }
 export const isAuthenticated: ExpresFunction = (req, res, next) => {
   try {
@@ -35,6 +37,18 @@ export const isAuthenticated: ExpresFunction = (req, res, next) => {
     }
 
     (req as Request & { user?: IUserDecoded }).user = decoded;
+    next();
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const isAdmin: ExpresFunction = async (req, res, next) => {
+  try {
+    const user = await User.findById(req.user?.id);
+    if (!user || user.role !== "admin") {
+      throw new ApiError(403, "Forbidden: Admin access required");
+    }
     next();
   } catch (error) {
     next(error);

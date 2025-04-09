@@ -25,6 +25,7 @@ const userSchema = new Schema<IUser>(
     verificationToken: { type: String },
     resetToken: { type: String },
     resetTokenExpires: { type: Date },
+    suspensionEnd: { type: Date, default: null },
   },
   {
     timestamps: true,
