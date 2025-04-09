@@ -54,6 +54,7 @@ export interface IUser extends Document {
   role: "admin" | "tutor" | "student"; // User role
   verified: boolean; // Email verification status
   isActive: boolean; // Account activation status
+  suspensionEnd?: Date;
   verificationToken?: string;
   resetToken?: string;
   resetTokenExpires?: Date;
