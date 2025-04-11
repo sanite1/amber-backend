@@ -28,7 +28,15 @@ export const createUserService = async (data: CreateUserRequest) => {
   data.password = hashedPassword;
 
   const verificationToken = randomBytes(32).toString("hex");
-  const userInfo = { ...data, verificationToken };
+  const userInfo = {
+    ...data,
+    verificationToken,
+    ...(data.role === "tutor" && {
+      ratings: 0,
+      totalLessons: 0,
+      numberOfReviews: 0,
+    }),
+  };
   const newUser = await User.create(userInfo);
   await sendVerificationMail(newUser);
 
