@@ -21,7 +21,7 @@ const createLessonSchema = {
       .required(),
     date: Joi.date().required(),
     duration: Joi.string().required(),
-    status: Joi.string().required(),
+    // status: Joi.string().required(),
     price: Joi.number().required(),
   }),
 };
