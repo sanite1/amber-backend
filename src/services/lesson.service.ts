@@ -66,7 +66,7 @@ export const createLesson = async (lessonData: ILesson) => {
     studentId,
     date,
     duration,
-    status,
+    // status,
     price,
   });
 

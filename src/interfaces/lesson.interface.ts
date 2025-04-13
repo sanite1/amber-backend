@@ -5,13 +5,13 @@ export interface ILesson {
   studentId: Types.ObjectId | string;
   date: Date;
   duration: string;
-  status: "scheduled" | "completed" | "cancelled";
+  status?: "scheduled" | "completed" | "cancelled" | "pending_payment";
   price: number;
 }
 
 export interface IUpdateLesson {
-  date: Date;
-  duration: string;
-  status: "scheduled" | "completed" | "cancelled";
-  price: number;
+  date?: Date;
+  duration?: string;
+  status?: "scheduled" | "completed" | "cancelled" | "pending_payment";
+  price?: number;
 }
