@@ -1,3 +1,4 @@
+import { NextFunction, Request, Response } from "express";
 import ApiError from "../errors/apiError";
 import ApiResponse from "../errors/apiResponse";
 import { ExpresFunction, IdParam } from "../interfaces/helper.interface";
@@ -18,6 +19,7 @@ import { sendInvoiceMail } from "../services/nodemailer/mail.service";
 import {
   createUserService,
   forgotPasswordService,
+  getTutorsService,
   getUserByIdService,
   loginService,
   reesetPasswordService,
@@ -193,6 +195,27 @@ export const updatePassword: ExpresFunction<IPasswordReset> = async (
   try {
     const data = await updatePasswordService(req.params as IdParam, req.body);
     return res.status(200).json(data);
+  } catch (error) {
+    next(error);
+  }
+};
+
+//get all tutors
+export const getTutors = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const { isActive, verified } = req.query;
+    const filters = {
+      isActive: isActive === undefined ? undefined : isActive === "true",
+      verified: verified === undefined ? undefined : verified === "true",
+    };
+    const tutors = await getTutorsService(filters);
+    res
+      .status(200)
+      .json(new ApiResponse(200, "Tutor retrieved successfully", tutors));
   } catch (error) {
     next(error);
   }

@@ -9,8 +9,8 @@ const LessonSchema: Schema<ILesson> = new Schema(
     duration: { type: String, required: true },
     status: {
       type: String,
-      enum: ["scheduled", "completed", "cancelled"],
-      default: "scheduled",
+      enum: ["scheduled", "completed", "cancelled", "pending_payment"],
+      default: "pending_payment",
     },
     price: { type: Number, required: true },
   },

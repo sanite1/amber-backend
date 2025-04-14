@@ -1,6 +1,7 @@
 import {
   createUserValidation,
   forgotPasswordValidation,
+  getTutorsValidation,
   getUserByIdValidation,
   loginUserValidation,
   parseJsonFields,
@@ -15,6 +16,7 @@ import { Router } from "express";
 import {
   createUser,
   forgotPassword,
+  getTutors,
   getUserById,
   login,
   refresh,
@@ -42,6 +44,8 @@ router
 router
   .route("/send-email")
   .post(upload.single("invoice"), sendEmailValidation(), sendEmailToClient);
+
+router.get("/tutors", isAuthenticated, getTutorsValidation(), getTutors);
 
 router
   .route("/:id")
@@ -73,4 +77,5 @@ router.patch(
   updatePassswordValidation(),
   updatePassword,
 );
+
 export default router;

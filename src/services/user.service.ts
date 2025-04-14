@@ -19,6 +19,7 @@ import jwt from "jsonwebtoken";
 import ApiResponse from "../errors/apiResponse";
 import { IdParam } from "../interfaces/helper.interface";
 import { IUserDecoded } from "../middlewares/authenticatedMiddleWare";
+import { UserFilterOptions } from "../interfaces/filter.interface";
 
 const saltRounds = 13;
 
@@ -27,7 +28,15 @@ export const createUserService = async (data: CreateUserRequest) => {
   data.password = hashedPassword;
 
   const verificationToken = randomBytes(32).toString("hex");
-  const userInfo = { ...data, verificationToken };
+  const userInfo = {
+    ...data,
+    verificationToken,
+    ...(data.role === "tutor" && {
+      ratings: 0,
+      totalLessons: 0,
+      numberOfReviews: 0,
+    }),
+  };
   const newUser = await User.create(userInfo);
   await sendVerificationMail(newUser);
 
@@ -233,4 +242,13 @@ export const getUserByIdService = async (params: IdParam) => {
     throw new ApiError(400, `User not found`);
   }
   return new ApiResponse(200, "User Found", user);
+};
+
+//get all tutor
+export const getTutorsService = async (filters: UserFilterOptions) => {
+  const query: any = { role: "tutor" };
+  if (filters.isActive !== undefined) query.isActive = filters.isActive;
+  if (filters.verified !== undefined) query.verified = filters.verified;
+
+  return await User.find(query);
 };

@@ -73,7 +73,7 @@ export const createLesson = async (
     studentId,
     date,
     duration,
-    status,
+    // status,
     price,
   });
   const endTime = moment.utc(date).add(duration, "minutes").toISOString();
