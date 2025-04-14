@@ -17,7 +17,8 @@ export const bookLesson = async (
   next: NextFunction,
 ) => {
   try {
-    const lesson = await createLesson(req.body);
+    const { accessToken, reminderMinutes } = req.body; // Pass from frontend
+    const lesson = await createLesson(req.body, accessToken, reminderMinutes);
     return res.status(200).json(lesson);
   } catch (error) {
     next(error);

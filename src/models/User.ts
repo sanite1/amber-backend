@@ -44,6 +44,9 @@ const userSchema = new Schema<IUser>(
     hourlyRate: { type: Number },
     yearsOfExperience: { type: Number },
     certifications: { type: [CertificationSchema], default: [] },
+    googleAccessToken: { type: String },
+    googleRefreshToken: { type: String },
+    tokenExpiryDate: { type: Date },
   },
   {
     timestamps: true,
