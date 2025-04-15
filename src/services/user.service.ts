@@ -32,7 +32,7 @@ export const createUserService = async (data: CreateUserRequest) => {
     ...data,
     verificationToken,
     ...(data.role === "tutor" && {
-      ratings: 0,
+      ratings: [],
       totalLessons: 0,
       numberOfReviews: 0,
     }),

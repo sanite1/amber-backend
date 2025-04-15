@@ -6,8 +6,15 @@ import User from "../models/User";
 import Lesson from "../models/lesson";
 import ApiResponse from "../errors/apiResponse";
 import { Types } from "mongoose";
+import { createCalendarEvent } from "../services/calendar.service";
+import { refreshOAuthToken } from "../services/calendar.service";
+import { google } from "googleapis";
 
-export const createLesson = async (lessonData: ILesson) => {
+export const createLesson = async (
+  lessonData: ILesson,
+  studentAccessToken: string,
+  reminderMinutes: number,
+) => {
   const { tutorId, studentId, date, duration, status, price } = lessonData;
 
   // Find student and tutor
@@ -69,8 +76,83 @@ export const createLesson = async (lessonData: ILesson) => {
     // status,
     price,
   });
+  const endTime = moment.utc(date).add(duration, "minutes").toISOString();
 
-  return new ApiResponse(200, "Lesson booked successfully", lesson);
+  // Create a Google Calendar event
+  // (Adjust the summary and description as needed. Here we use tutor and student last names.)
+
+  const studentWithToken = await User.findOne({ email: student.email });
+
+  if (!studentWithToken) {
+    throw new Error("Student not found");
+  }
+
+  const accessToken = studentWithToken.googleAccessToken;
+  const refreshToken = studentWithToken.googleRefreshToken;
+
+  if (!accessToken) {
+    throw new Error("Access token not found for this student.");
+  }
+  const now = new Date().getTime();
+  if (
+    studentWithToken.tokenExpiryDate &&
+    studentWithToken.tokenExpiryDate.getTime() <= now
+  ) {
+    await refreshOAuthToken(studentWithToken);
+  }
+
+  if (!accessToken || !refreshToken) {
+    throw new Error("Missing Google Calendar access or refresh token.");
+  }
+
+  // Create the calendar event
+  const calendarEvent = await createCalendarEvent({
+    student,
+    summary: `${student.lastname}, you have an ESOL lesson with ${tutor.lastname}`,
+    description: `${duration}-minute session`,
+    startTime: dateISO,
+    endTime,
+    recipientEmail: student.email, // optional now, used for older logic
+    accessToken,
+    reminderMinutes,
+    attendees: [{ email: student.email }, { email: tutor.email }],
+  });
+  // 2. Extract the meet link
+  const meetLink =
+    calendarEvent.hangoutLink ||
+    calendarEvent.conferenceData?.entryPoints?.find(
+      (p) => p.entryPointType === "video",
+    )?.uri;
+
+  // 3. (Optional) Update the event to add the Meet link into its description
+  if (meetLink && calendarEvent.id) {
+    const oAuth2Client = new google.auth.OAuth2();
+    oAuth2Client.setCredentials({ access_token: accessToken });
+
+    const calendar = google.calendar({ version: "v3", auth: oAuth2Client });
+
+    await calendar.events.patch({
+      calendarId: "primary",
+      eventId: calendarEvent.id, // ✅ Now guaranteed to be a string
+      requestBody: {
+        description: `${duration}-minute session\n\nGoogle Meet Link: ${meetLink}`,
+      },
+    });
+  }
+
+  return new ApiResponse(200, "Lesson booked successfully", {
+    lesson,
+    meetLink,
+  });
+
+  console.log("📅 Calendar Event Created:", calendarEvent);
+
+  console.log("🔗 Google Meet Link:", calendarEvent.hangoutLink);
+
+  return new ApiResponse(200, "Lesson booked successfully", {
+    lesson,
+    meetLink: calendarEvent.hangoutLink, // <- this is the Google Meet link
+  });
 };
 
 // Service function to get all lessons

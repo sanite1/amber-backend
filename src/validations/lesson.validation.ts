@@ -20,7 +20,7 @@ const createLessonSchema = {
       }, "ObjectId validation")
       .required(),
     date: Joi.date().required(),
-    duration: Joi.string().required(),
+    duration: Joi.number().required(),
     // status: Joi.string().required(),
     price: Joi.number().required(),
   }),

@@ -293,7 +293,7 @@ export const autoReactivateStudents = async () => {
     role: "student",
   });
   if (studentsToReactivate.length === 0) {
-    console.log("No students to reactivate.");
+    return new ApiResponse(200, "No students to reactivate.");
   }
   for (const student of studentsToReactivate) {
     student.isActive = true;
@@ -321,7 +321,7 @@ export const autoReactivateTutors = async () => {
     role: "tutor",
   });
   if (tutorsToReactivate.length === 0) {
-    console.log("No tutors to reactivate.");
+    return new ApiResponse(200, "No tutors to reactivate.");
   }
   for (const tutor of tutorsToReactivate) {
     tutor.isActive = true;

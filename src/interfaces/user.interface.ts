@@ -10,6 +10,9 @@ export interface CreateUserRequest {
   profilePicture?: string; // Optional field
   isVerified?: boolean; // Defaults to false
   isActive?: boolean; // Defaults to true
+  googleAccessToken?: string;
+  googleRefreshToken?: string;
+  tokenExpiryDate?: Date;
 }
 export interface ISendEmail {
   email: string;
@@ -69,4 +72,7 @@ export interface IUser extends Document {
   certifications?: ICertification[];
   createdAt: Date;
   updatedAt: Date;
+  googleAccessToken: string;
+  googleRefreshToken: string;
+  tokenExpiryDate: Date;
 }

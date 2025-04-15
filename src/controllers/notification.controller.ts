@@ -56,7 +56,7 @@ export const markNotificationAsRead = async (
       req.params.notificationId,
       req.body,
     );
-    //console.log(req.params.notificationId);
+
     return res
       .status(200)
       .json(
