@@ -1,9 +1,13 @@
-import IUser from "../models/User";
-
 export interface CalendarEventDetails {
   student: any;
   summary: string;
   description: string;
-  startTime: string; // ISO string
-  endTime: string; // ISO string
+  startTime: string;
+  endTime: string;
+  recipientEmail: string;
+  accessToken: string;
+  attendees: { email: string }[];
+  refreshToken?: string;
+  expiryDate?: Date;
+  reminderMinutes: number;
 }

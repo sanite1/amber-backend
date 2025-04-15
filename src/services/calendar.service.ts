@@ -3,22 +3,9 @@ import { google } from "googleapis";
 import dotenv from "dotenv";
 import UserModel from "../models/User";
 import { IUser } from "../interfaces/user.interface";
+import { CalendarEventDetails } from "../interfaces/calendar.interface";
 
 dotenv.config();
-
-export interface CalendarEventDetails {
-  student: any;
-  summary: string;
-  description: string;
-  startTime: string;
-  endTime: string;
-  recipientEmail: string;
-  accessToken: string;
-  attendees: { email: string }[];
-  refreshToken?: string; // <-- add this
-  expiryDate?: Date; // <-- and this
-  reminderMinutes: number;
-}
 
 export const createCalendarEvent = async ({
   student,

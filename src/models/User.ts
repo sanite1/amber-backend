@@ -38,7 +38,7 @@ const userSchema = new Schema<IUser>(
     timezone: { type: String },
     languages: { type: [String] },
     bio: { type: String },
-    ratings: { type: String },
+    ratings: { type: [Number], default: [] },
     totalLessons: { type: Number },
     numberOfReviews: { type: Number },
     hourlyRate: { type: Number },
