@@ -9,18 +9,8 @@ import { approveCourseBookingController } from "../controllers/course.controller
 
 const router = express.Router();
 
-router.post(
-  "/book",
-  isAuthenticated,
-  createCourseValidation,
-  createCourseBookingController,
-);
+router.post("/book", createCourseValidation, createCourseBookingController);
 
-router.post(
-  "/bookings/approve/",
-  isAuthenticated,
-  //IsAdmin
-  approveCourseBookingController,
-);
+router.post("/bookings/approve", approveCourseBookingController);
 
 export default router;
