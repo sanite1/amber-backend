@@ -1,0 +1,47 @@
+<div
+  style="font-family: Arial, sans-serif; background-color: #f9f9f9; padding: 30px;"
+>
+  <!-- Grey Amber Header -->
+  <div
+    style="background-color: #fff; padding: 20px 0; text-align: center; border-radius: 8px 8px 0 0;"
+  >
+    <img
+      src="https://res.cloudinary.com/dv4uk8qqc/image/upload/v1742470541/Amber_Users/i66ramiru2d9doyfo7hx.png"
+      alt="Amber Training Logo"
+      style="max-width: 150px; height: auto;"
+    />
+  </div>
+
+  <!-- White Body Content -->
+  <div
+    style="max-width: 600px; margin: 0 auto; background: #e0e0e0; padding: 25px; border-radius: 0 0 8px 8px; box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.05);"
+  >
+    <h2 style="color: #333;">New Course Booking Request</h2>
+    <p style="font-size: 16px; color: #444;">A new course booking request has
+      been submitted with the following details:</p>
+
+    <h3 style="color: #ff7c22;">Course Information</h3>
+    <ul style="list-style: none; padding: 0; color: #555; font-size: 15px;">
+      <li><strong>Name:</strong> {{course.name}}</li>
+      <li><strong>Duration:</strong> {{course.duration}}</li>
+      <li><strong>Mode:</strong> {{course.mode}}</li>
+      <li><strong>Certification:</strong> {{course.certification}}</li>
+      <li><strong>Price:</strong> £{{course.price}}</li>
+    </ul>
+
+    <h3 style="color: #ff7c22;">Applicant Details</h3>
+    <ul style="list-style: none; padding: 0; color: #555; font-size: 15px;">
+      <li><strong>Full Name:</strong> {{fullName}}</li>
+      <li><strong>Email:</strong> {{email}}</li>
+      <li><strong>Phone:</strong> {{phone}}</li>
+      <li><strong>Organization:</strong> {{organizationName}}</li>
+      <li><strong>Number of Participants:</strong> {{numberOfParticipants}}</li>
+      <li><strong>Location Preference:</strong> {{locationPreference}}</li>
+      <li><strong>Preferred Dates:</strong> {{preferredDates}}</li>
+      <li><strong>Notes:</strong> {{notes}}</li>
+    </ul>
+
+    <p style="font-size: 15px; color: #666; margin-top: 30px;">Please review the
+      request at your earliest convenience.</p>
+  </div>
+</div>

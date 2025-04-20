@@ -145,10 +145,6 @@ export const createLesson = async (
     meetLink,
   });
 
-  console.log("📅 Calendar Event Created:", calendarEvent);
-
-  console.log("🔗 Google Meet Link:", calendarEvent.hangoutLink);
-
   return new ApiResponse(200, "Lesson booked successfully", {
     lesson,
     meetLink: calendarEvent.hangoutLink, // <- this is the Google Meet link

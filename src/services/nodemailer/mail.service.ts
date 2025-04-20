@@ -2,6 +2,7 @@ import { createTransport } from "nodemailer";
 import ApiError from "../../errors/apiError";
 import { IUser } from "../../interfaces/user.interface";
 import transporter from "./nodemailer";
+import { CourseBooking } from "../../interfaces/coursebooking.interface";
 import path from "path";
 import fs from "fs";
 
@@ -93,5 +94,65 @@ export const sendNotificationMail = async (user: IUser, message: string) => {
     await transporter.sendMail(mailOptions);
   } catch (error) {
     throw new ApiError(500, `Error sending notification email:${error}`);
+  }
+};
+
+//Send Admin notification
+export const sendCourseBookingNotification = async (
+  adminEmail: string,
+  booking: CourseBooking,
+) => {
+  const mailOptions = {
+    from: `"Amber Training" <${process.env.AUTH_EMAIL}>`,
+    to: adminEmail,
+    subject: "New Course Booking Received",
+    template: "./bookcourse", // this corresponds to bookcourse.handlebars
+    context: booking,
+  };
+
+  try {
+    await transporter.sendMail(mailOptions);
+  } catch (error) {
+    throw new ApiError(500, `Error sending course booking email: ${error}`);
+  }
+};
+
+//Send User notification
+export const sendCourseBookingConfirmation = async (
+  email: string,
+  booking: any,
+) => {
+  const mailOptions = {
+    from: `"Amber Training" <${process.env.AUTH_EMAIL}>`,
+    to: email,
+    subject: "Booking Request Received",
+    template: "./coursebookinguser", // refers to coursebookinguser.handlebars
+    context: booking,
+  };
+
+  try {
+    await transporter.sendMail(mailOptions);
+  } catch (error) {
+    throw new ApiError(
+      500,
+      `Error sending confirmation email to user: ${error}`,
+    );
+  }
+};
+
+//SendBooking
+export const sendBookingApprovalEmail = async (email: string, data: any) => {
+  const mailOptions = {
+    from: `"Amber Training" <${process.env.AUTH_EMAIL}>`,
+    to: email,
+    subject: "Your Booking is Approved – Amber Training",
+    template: "./coursebookingapproval",
+    context: data,
+  };
+
+  try {
+    await transporter.sendMail(mailOptions);
+  } catch (error) {
+    throw new ApiError(500, `Error sending booking approval email: ${error}`);
   }
 };

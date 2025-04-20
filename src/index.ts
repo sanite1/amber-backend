@@ -13,6 +13,7 @@ import lessonRoutes from "./routes/lesson.routes";
 import messageRoutes from "./routes/message.routes";
 import adminRoutes from "./routes/admin.routes";
 import calendarRoutes from "./routes/calendar.routes";
+import bookCourseRoutes from "./routes/course.routes";
 import "./cron/studentCron";
 import "./cron/tutorCron";
 
@@ -39,6 +40,7 @@ app.use("/api/lessons", lessonRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/messages", messageRoutes); //Add messages routes
 app.use("/api/calendar", calendarRoutes); //Add calendar routes
+app.use("/api/courses", bookCourseRoutes); //Add coures routes
 
 app.listen(PORT, () => {
   console.log("Server Listening on port 4000...");
