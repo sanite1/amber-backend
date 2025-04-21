@@ -13,9 +13,8 @@ export const createCourseBookingService = async (data: any) => {
   try {
     const booking = data;
 
-    // 🔔 Notify Admin(s)
-
     if (!booking.course) {
+      console.error("❌ Missing course information in booking.");
       throw new ApiError(400, "Course information is missing in booking.");
     }
 
@@ -44,10 +43,10 @@ export const createCourseBookingService = async (data: any) => {
     // Replace the raw preferredDates with formattedPreferredDates for email
     const emailContent = {
       ...bookingData,
-      preferredDates: formattedPreferredDates, // ✅ overwrite with human-readable string
+      preferredDates: formattedPreferredDates,
     };
 
-    // Send admin emai
+    // Send admin email
     await sendCourseBookingNotification(
       "support@ambertraining.co.uk",
       emailContent,
@@ -62,6 +61,7 @@ export const createCourseBookingService = async (data: any) => {
       booking,
     );
   } catch (error) {
+    console.error("❗ Error in createCourseBookingService:", error);
     throw new ApiError(
       500,
       "Something went wrong while handling the booking request",

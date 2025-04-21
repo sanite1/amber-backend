@@ -1,3 +1,4 @@
+import { Request, Response, NextFunction } from "express";
 import { Joi, validate } from "express-validation";
 import { Types } from "mongoose";
 
@@ -17,13 +18,15 @@ const createCourseBookingSchema = {
     phone: Joi.string().min(7).max(20).required(),
     organizationName: Joi.string().allow("").optional(),
     numberOfParticipants: Joi.number().min(1).max(50).required(),
-
-    // Location preference enum updated
     locationPreference: Joi.string().valid("on-site", "physical").required(),
-
-    preferredDates: Joi.array().items(Joi.date()).min(1).required(),
-    // notes: Joi.string().allow("").optional(),
-    // isGdprConsented: Joi.boolean().valid(true).required(),
+    preferredDates: Joi.array()
+      .items(
+        Joi.string()
+          .isoDate()
+          .message("Each preferred date must be a valid ISO date"),
+      )
+      .min(1)
+      .required(),
   }),
 };
 
@@ -47,12 +50,28 @@ const bookingApprovalSchema = {
   }),
 };
 
-export const createCourseValidation = () => {
-  return validate(
-    createCourseBookingSchema,
-    { context: true },
-    { abortEarly: false },
+export const createCourseValidation = (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  const { error: validationError } = createCourseBookingSchema.body.validate(
+    req.body,
+    {
+      convert: true,
+      abortEarly: false,
+    },
   );
+
+  if (validationError) {
+    console.error("❌ Joi validation error:", validationError.details);
+    return res.status(400).json({
+      message: "Validation failed",
+      details: validationError.details.map((err) => err.message),
+    });
+  }
+
+  next();
 };
 
 export const bookingApprovalValidation = () => {
