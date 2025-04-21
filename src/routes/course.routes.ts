@@ -11,7 +11,7 @@ const router = express.Router();
 
 router.post(
   "/book",
-  isAuthenticated,
+  //isAuthenticated,
   createCourseValidation,
   createCourseBookingController,
 );
@@ -19,7 +19,7 @@ router.post(
 router.post(
   "/bookings/approve/",
   isAuthenticated,
-  //IsAdmin
+  //IsAdmin,
   approveCourseBookingController,
 );
 
