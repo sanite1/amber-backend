@@ -31,8 +31,9 @@ const CourseBookingSchema = new Schema(
       default: "approved",
     },
     address: {
-      type: String,
-      default: "N/A",
+      street: { type: String, default: "N/A" },
+      city: { type: String, default: "N/A" },
+      state: { type: String, default: "N/A" },
     },
     gdprConsent: {
       type: Boolean,

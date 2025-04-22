@@ -24,7 +24,6 @@ export const createCourseBookingController = async (
         message: error.message,
       });
     }
-
     console.error("❗ Failed to create course booking:", error);
     return next(new ApiError(500, "Failed to create course booking"));
   }

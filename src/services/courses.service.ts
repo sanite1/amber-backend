@@ -16,12 +16,14 @@ export const createCourseBookingService = async (data: any) => {
     if (!booking.course) {
       throw new ApiError(400, "Course information is missing in booking.");
     }
-
     if (
       booking.locationPreference === "on-site" &&
-      (!booking.address || booking.address.trim() === "")
+      (!booking.address ||
+        !booking.address.street ||
+        !booking.address.city ||
+        !booking.address.state)
     ) {
-      throw new ApiError(400, "Address is required for on-site bookings.");
+      throw new ApiError(400, "Full address is required for on-site bookings.");
     }
 
     // Ensure preferredDates is an array
@@ -74,13 +76,10 @@ export const createCourseBookingService = async (data: any) => {
     await sendCourseBookingNotification("bahdguy496@gmail.com", emailContent);
     await sendCourseBookingConfirmation(booking.email, emailContent);
 
-    // Save to the database and log if successful
-    const savedBooking = await CourseBooking.create(bookingData);
-
     return new ApiResponse(
       200,
       "Booking request received. We will contact you shortly.",
-      savedBooking,
+      bookingData,
     );
   } catch (error) {
     // Handle known ApiErrors
@@ -100,12 +99,23 @@ export const approveCourseBookingService = async (data: any) => {
     if (!data.course) {
       throw new ApiError(400, "Course information is missing in booking.");
     }
-
     if (
       data.locationPreference === "on-site" &&
-      (!data.address || data.address.trim() === "")
+      (!data.address ||
+        !data.address.street ||
+        !data.address.city ||
+        !data.address.state)
     ) {
-      throw new ApiError(400, "Address is required for on-site bookings.");
+      throw new ApiError(400, "Full address is required for on-site bookings.");
+    }
+    if (!Array.isArray(data.preferredDates)) {
+      console.error("❗ Preferred dates is not an array:", data.preferredDates);
+      throw new ApiError(400, "Preferred dates must be an array.");
+    }
+
+    // Check if preferredDates array is empty
+    if (data.preferredDates.length === 0) {
+      console.error("❗ Preferred dates array is empty!");
     }
 
     const bookingData = {
