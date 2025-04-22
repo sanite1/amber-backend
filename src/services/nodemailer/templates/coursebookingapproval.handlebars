@@ -16,11 +16,17 @@
       has been approved. Here are your booking details:</p>
 
     <ul style="font-size: 14px; color: #555;">
-      <li><strong>Name:</strong> {{course.name}}</li>
+      <li><strong>Name:</strong> {{fullName}}</li>
+      <li><strong>Course:</strong> {{course.name}}</li>
       <li><strong>Duration:</strong> {{course.duration}}</li>
       <li><strong>Mode:</strong> {{course.mode}}</li>
       <li><strong>Certification:</strong> {{course.certification}}</li>
       <li><strong>Price:</strong> £{{course.price}}</li>
+      <li><strong>Preferred Dates:</strong> {{formattedPreferredDates}}</li>
+      <!-- Conditionally display the address if provided -->
+      {{#if address}}
+        <li><strong>Address:</strong> {{address}}</li>
+      {{/if}}
     </ul>
 
     <p>Thank you for choosing Amber Training. An invoice has been generated and

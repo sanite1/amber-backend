@@ -9,7 +9,7 @@ export interface CourseBooking {
   phone: string;
   organizationName?: string;
   numberOfParticipants: number;
-  locationPreference: "on-site" | "physical";
+  locationPreference: "on-site" | "online";
   preferredDates: Date[];
   paymentStatus?: "pending" | "paid";
   status?: "pending" | "approved";
