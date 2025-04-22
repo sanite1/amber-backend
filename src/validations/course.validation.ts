@@ -19,28 +19,37 @@ const createCourseBookingSchema = {
     numberOfParticipants: Joi.number().min(1).max(50).required(),
     locationPreference: Joi.string().valid("on-site", "online").required(),
 
-    address: Joi.alternatives().conditional("locationPreference", [
-      {
-        is: "on-site",
-        then: Joi.string().required().messages({
+    address: Joi.alternatives().conditional("locationPreference", {
+      is: "on-site",
+      then: Joi.object({
+        street: Joi.string().required().messages({
+          "any.required": "Street is required for on-site bookings.",
+        }),
+        city: Joi.string().required().messages({
+          "any.required": "City is required for on-site bookings.",
+        }),
+        state: Joi.string().required().messages({
+          "any.required": "State is required for on-site bookings.",
+        }),
+      })
+        .required()
+        .messages({
           "any.required": "Address is required for on-site bookings.",
         }),
-      },
-      {
-        is: "online",
-        then: Joi.forbidden().messages({
-          "any.unknown": "Address should not be provided for online bookings.",
-        }),
-      },
-    ]),
+      otherwise: Joi.forbidden().messages({
+        "any.unknown": "Address should not be provided for online bookings.",
+      }),
+    }),
+
     gdprConsent: Joi.boolean().valid(true).required().messages({
       "any.only": "You must consent to data processing to proceed.",
     }),
+
     preferredDates: Joi.array()
       .items(
-        Joi.string()
-          .isoDate()
-          .message("Each preferred date must be a valid ISO date"),
+        Joi.string().isoDate().messages({
+          "string.isoDate": "Each preferred date must be a valid ISO date",
+        }),
       )
       .min(1)
       .required(),
@@ -64,20 +73,28 @@ const bookingApprovalSchema = {
     numberOfParticipants: Joi.number().min(1).max(50).required(),
     locationPreference: Joi.string().valid("on-site", "online").required(),
 
-    address: Joi.alternatives().conditional("locationPreference", [
-      {
-        is: "on-site",
-        then: Joi.string().required().messages({
+    address: Joi.alternatives().conditional("locationPreference", {
+      is: "on-site",
+      then: Joi.object({
+        street: Joi.string().required().messages({
+          "any.required": "Street is required for on-site bookings.",
+        }),
+        city: Joi.string().required().messages({
+          "any.required": "City is required for on-site bookings.",
+        }),
+        state: Joi.string().required().messages({
+          "any.required": "State is required for on-site bookings.",
+        }),
+      })
+        .required()
+        .messages({
           "any.required": "Address is required for on-site bookings.",
         }),
-      },
-      {
-        is: "online",
-        then: Joi.forbidden().messages({
-          "any.unknown": "Address should not be provided for online bookings.",
-        }),
-      },
-    ]),
+      otherwise: Joi.forbidden().messages({
+        "any.unknown": "Address should not be provided for online bookings.",
+      }),
+    }),
+
     gdprConsent: Joi.boolean().valid(true).default(true).required().messages({
       "any.only": "You must consent to data processing to proceed.",
     }),
