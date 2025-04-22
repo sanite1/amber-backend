@@ -73,7 +73,7 @@ export const createCourseBookingService = async (data: any) => {
       preferredDates: formattedPreferredDates,
     };
 
-    await sendCourseBookingNotification("bahdguy496@gmail.com", emailContent);
+    await sendCourseBookingNotification("support@ambertraining.co.uk", emailContent);
     await sendCourseBookingConfirmation(booking.email, emailContent);
 
     return new ApiResponse(
