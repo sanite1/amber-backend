@@ -1,6 +1,5 @@
 import { Request, Response, NextFunction } from "express";
 import { Joi, validate } from "express-validation";
-import { Types } from "mongoose";
 
 // Schema for creating a course booking
 const createCourseBookingSchema = {
@@ -18,7 +17,25 @@ const createCourseBookingSchema = {
     phone: Joi.string().min(7).max(20).required(),
     organizationName: Joi.string().allow("").optional(),
     numberOfParticipants: Joi.number().min(1).max(50).required(),
-    locationPreference: Joi.string().valid("on-site", "physical").required(),
+    locationPreference: Joi.string().valid("on-site", "online").required(),
+
+    address: Joi.alternatives().conditional("locationPreference", [
+      {
+        is: "on-site",
+        then: Joi.string().required().messages({
+          "any.required": "Address is required for on-site bookings.",
+        }),
+      },
+      {
+        is: "online",
+        then: Joi.forbidden().messages({
+          "any.unknown": "Address should not be provided for online bookings.",
+        }),
+      },
+    ]),
+    gdprConsent: Joi.boolean().valid(true).required().messages({
+      "any.only": "You must consent to data processing to proceed.",
+    }),
     preferredDates: Joi.array()
       .items(
         Joi.string()
@@ -45,11 +62,31 @@ const bookingApprovalSchema = {
     phone: Joi.string().min(7).max(20).required(),
     organizationName: Joi.string().allow("").optional(),
     numberOfParticipants: Joi.number().min(1).max(50).required(),
-    locationPreference: Joi.string().valid("on-site", "physical").required(),
+    locationPreference: Joi.string().valid("on-site", "online").required(),
+
+    address: Joi.alternatives().conditional("locationPreference", [
+      {
+        is: "on-site",
+        then: Joi.string().required().messages({
+          "any.required": "Address is required for on-site bookings.",
+        }),
+      },
+      {
+        is: "online",
+        then: Joi.forbidden().messages({
+          "any.unknown": "Address should not be provided for online bookings.",
+        }),
+      },
+    ]),
+    gdprConsent: Joi.boolean().valid(true).default(true).required().messages({
+      "any.only": "You must consent to data processing to proceed.",
+    }),
+
     preferredDates: Joi.array().items(Joi.date()).min(1).required(),
   }),
 };
 
+// Middleware for validating course creation
 export const createCourseValidation = (
   req: Request,
   res: Response,
@@ -74,6 +111,7 @@ export const createCourseValidation = (
   next();
 };
 
+// Middleware for validating booking approval
 export const bookingApprovalValidation = () => {
   return validate(
     bookingApprovalSchema,

@@ -1,19 +1,13 @@
 import { Request, Response, NextFunction } from "express";
-import { createCourseBookingService } from "../services/courses.service";
+import {
+  createCourseBookingService,
+  approveCourseBookingService,
+} from "../services/courses.service";
 import ApiResponse from "../errors/apiResponse";
 import ApiError from "../errors/apiError";
-import { approveCourseBookingService } from "../services/courses.service";
 
-// export const approveBooking = async (req: Request, res: Response) => {
-//     const { bookingId } = req.params;
-//     const booking = await approveStaticCourseBookingService(bookingId);
-//     return res.status(200).json(
-//       new ApiResponse(200, "Booking approved successfully", booking)
-//     );
-//   });
-// controllers/course.controller.ts
-
-//Create Course
+// Create Course Booking
+// Create Course Booking
 export const createCourseBookingController = async (
   req: Request,
   res: Response,
@@ -22,12 +16,22 @@ export const createCourseBookingController = async (
   try {
     const data = req.body;
     const response: ApiResponse = await createCourseBookingService(data);
-    res.status(response.statusCode).json(response);
+    return res.status(response.statusCode).json(response);
   } catch (error) {
-    next(new ApiError(500, "Failed to create course booking"));
+    if (error instanceof ApiError) {
+      return res.status(error.statusCode).json({
+        status: error.statusCode,
+        message: error.message,
+      });
+    }
+
+    console.error("❗ Failed to create course booking:", error);
+    return next(new ApiError(500, "Failed to create course booking"));
   }
 };
 
+// Approve Course Booking
+// Approve Course Booking
 export const approveCourseBookingController = async (
   req: Request,
   res: Response,
@@ -35,13 +39,19 @@ export const approveCourseBookingController = async (
 ) => {
   try {
     const data = req.body;
-
     const approvedBooking = await approveCourseBookingService(data);
-
     return res
       .status(200)
       .json(new ApiResponse(200, "Lesson booking approved", approvedBooking));
   } catch (error) {
-    next(error);
+    if (error instanceof ApiError) {
+      return res.status(error.statusCode).json({
+        status: error.statusCode,
+        message: error.message,
+      });
+    }
+
+    console.error("❗ Failed to approve course booking:", error);
+    return next(new ApiError(500, "Failed to approve course booking"));
   }
 };

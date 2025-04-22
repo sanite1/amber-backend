@@ -45,7 +45,7 @@ router
   .route("/send-email")
   .post(upload.single("invoice"), sendEmailValidation(), sendEmailToClient);
 
-router.get("/tutors", isAuthenticated, getTutorsValidation(), getTutors);
+router.get("/tutors", getTutorsValidation(), getTutors);
 
 router
   .route("/:id")
