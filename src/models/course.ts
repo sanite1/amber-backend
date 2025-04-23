@@ -16,7 +16,7 @@ const CourseBookingSchema = new Schema(
     numberOfParticipants: { type: Number, required: true },
     locationPreference: {
       type: String,
-      enum: ["on-site", "physical"],
+      enum: ["on-site", "online"],
       required: true,
     },
     preferredDates: [{ type: Date, required: true }],
@@ -29,6 +29,15 @@ const CourseBookingSchema = new Schema(
       type: String,
       enum: ["pending", "approved", "rejected"],
       default: "approved",
+    },
+    address: {
+      street: { type: String, default: "N/A" },
+      city: { type: String, default: "N/A" },
+      state: { type: String, default: "N/A" },
+    },
+    gdprConsent: {
+      type: Boolean,
+      default: true,
     },
   },
   { timestamps: true },

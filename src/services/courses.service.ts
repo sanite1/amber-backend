@@ -13,10 +13,31 @@ export const createCourseBookingService = async (data: any) => {
   try {
     const booking = data;
 
-    // 🔔 Notify Admin(s)
-
     if (!booking.course) {
       throw new ApiError(400, "Course information is missing in booking.");
+    }
+    if (
+      booking.locationPreference === "on-site" &&
+      (!booking.address ||
+        !booking.address.street ||
+        !booking.address.city ||
+        !booking.address.state)
+    ) {
+      throw new ApiError(400, "Full address is required for on-site bookings.");
+    }
+
+    // Ensure preferredDates is an array
+    if (!Array.isArray(booking.preferredDates)) {
+      console.error(
+        "❗ Preferred dates is not an array:",
+        booking.preferredDates,
+      );
+      throw new ApiError(400, "Preferred dates must be an array.");
+    }
+
+    // Check if preferredDates array is empty
+    if (booking.preferredDates.length === 0) {
+      console.error("❗ Preferred dates array is empty!");
     }
 
     const bookingData = {
@@ -33,35 +54,42 @@ export const createCourseBookingService = async (data: any) => {
       organizationName: booking.organizationName || "N/A",
       numberOfParticipants: booking.numberOfParticipants,
       locationPreference: booking.locationPreference,
-      preferredDates: booking.preferredDates.map((d: string) => new Date(d)), // Convert to Date
+      address: booking.address || "N/A",
+      // Convert preferredDates to Date objects and log the result
+      preferredDates: booking.preferredDates.map((d: string) => {
+        const date = new Date(d);
+        return date;
+      }),
+      gdprConsent: true,
     };
 
-    // Format preferredDates for display
+    // Format the preferredDates as string
     const formattedPreferredDates = bookingData.preferredDates
       .map((date: Date) => date.toLocaleDateString("en-GB"))
       .join(", ");
 
-    // Replace the raw preferredDates with formattedPreferredDates for email
     const emailContent = {
       ...bookingData,
-      preferredDates: formattedPreferredDates, // ✅ overwrite with human-readable string
+      preferredDates: formattedPreferredDates,
     };
 
-    // Send admin emai
     await sendCourseBookingNotification(
       "support@ambertraining.co.uk",
       emailContent,
     );
-
-    // Send user confirmation email
     await sendCourseBookingConfirmation(booking.email, emailContent);
 
     return new ApiResponse(
       200,
       "Booking request received. We will contact you shortly.",
-      booking,
+      bookingData,
     );
   } catch (error) {
+    // Handle known ApiErrors
+    if (error instanceof ApiError) throw error;
+
+    // Log unexpected errors
+    console.error("❗ Unexpected error in createCourseBookingService:", error);
     throw new ApiError(
       500,
       "Something went wrong while handling the booking request",
@@ -69,12 +97,28 @@ export const createCourseBookingService = async (data: any) => {
   }
 };
 
-//Approve Lesson
 export const approveCourseBookingService = async (data: any) => {
   try {
     if (!data.course) {
-      console.error("❌ Missing course info in booking");
       throw new ApiError(400, "Course information is missing in booking.");
+    }
+    if (
+      data.locationPreference === "on-site" &&
+      (!data.address ||
+        !data.address.street ||
+        !data.address.city ||
+        !data.address.state)
+    ) {
+      throw new ApiError(400, "Full address is required for on-site bookings.");
+    }
+    if (!Array.isArray(data.preferredDates)) {
+      console.error("❗ Preferred dates is not an array:", data.preferredDates);
+      throw new ApiError(400, "Preferred dates must be an array.");
+    }
+
+    // Check if preferredDates array is empty
+    if (data.preferredDates.length === 0) {
+      console.error("❗ Preferred dates array is empty!");
     }
 
     const bookingData = {
@@ -91,7 +135,9 @@ export const approveCourseBookingService = async (data: any) => {
       organizationName: data.organizationName || "N/A",
       numberOfParticipants: data.numberOfParticipants,
       locationPreference: data.locationPreference,
-      preferredDates: data.preferredDates.map((d: string) => new Date(d)), // Convert strings to Date
+      address: data.address || "N/A",
+      preferredDates: data.preferredDates.map((d: string) => new Date(d)),
+      gdprConsent: true,
     };
 
     const formattedPreferredDates = bookingData.preferredDates
@@ -100,16 +146,18 @@ export const approveCourseBookingService = async (data: any) => {
 
     const emailContent = {
       ...bookingData,
-      preferredDates: formattedPreferredDates, // Replace with formatted string
+      preferredDates: formattedPreferredDates,
     };
 
     await sendBookingApprovalEmail(data.email, emailContent);
 
     const savedBooking = await CourseBooking.create(bookingData);
-    const check = await CourseBooking.findById(savedBooking._id);
-    return savedBooking; // Return saved DB record
+
+    return savedBooking;
   } catch (error) {
-    console.error("🔥 Error during booking approval:", error);
+    if (error instanceof ApiError) throw error;
+
+    console.error("🔥 Unexpected error during booking approval:", error);
     throw new ApiError(
       500,
       "Something went wrong while approving the booking.",

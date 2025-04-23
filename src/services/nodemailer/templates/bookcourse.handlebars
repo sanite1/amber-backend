@@ -37,8 +37,10 @@
       <li><strong>Organization:</strong> {{organizationName}}</li>
       <li><strong>Number of Participants:</strong> {{numberOfParticipants}}</li>
       <li><strong>Location Preference:</strong> {{locationPreference}}</li>
+      {{#if address}}
+        <li><strong>Address:</strong> {{address}}</li>
+      {{/if}}
       <li><strong>Preferred Dates:</strong> {{preferredDates}}</li>
-      <li><strong>Notes:</strong> {{notes}}</li>
     </ul>
 
     <p style="font-size: 15px; color: #666; margin-top: 30px;">Please review the

@@ -1,5 +1,5 @@
+import { Request, Response, NextFunction } from "express";
 import { Joi, validate } from "express-validation";
-import { Types } from "mongoose";
 
 // Schema for creating a course booking
 const createCourseBookingSchema = {
@@ -17,13 +17,42 @@ const createCourseBookingSchema = {
     phone: Joi.string().min(7).max(20).required(),
     organizationName: Joi.string().allow("").optional(),
     numberOfParticipants: Joi.number().min(1).max(50).required(),
+    locationPreference: Joi.string().valid("on-site", "online").required(),
 
-    // Location preference enum updated
-    locationPreference: Joi.string().valid("on-site", "physical").required(),
+    address: Joi.alternatives().conditional("locationPreference", {
+      is: "on-site",
+      then: Joi.object({
+        street: Joi.string().required().messages({
+          "any.required": "Street is required for on-site bookings.",
+        }),
+        city: Joi.string().required().messages({
+          "any.required": "City is required for on-site bookings.",
+        }),
+        state: Joi.string().required().messages({
+          "any.required": "State is required for on-site bookings.",
+        }),
+      })
+        .required()
+        .messages({
+          "any.required": "Address is required for on-site bookings.",
+        }),
+      otherwise: Joi.forbidden().messages({
+        "any.unknown": "Address should not be provided for online bookings.",
+      }),
+    }),
 
-    preferredDates: Joi.array().items(Joi.date()).min(1).required(),
-    // notes: Joi.string().allow("").optional(),
-    // isGdprConsented: Joi.boolean().valid(true).required(),
+    gdprConsent: Joi.boolean().valid(true).required().messages({
+      "any.only": "You must consent to data processing to proceed.",
+    }),
+
+    preferredDates: Joi.array()
+      .items(
+        Joi.string().isoDate().messages({
+          "string.isoDate": "Each preferred date must be a valid ISO date",
+        }),
+      )
+      .min(1)
+      .required(),
   }),
 };
 
@@ -42,19 +71,64 @@ const bookingApprovalSchema = {
     phone: Joi.string().min(7).max(20).required(),
     organizationName: Joi.string().allow("").optional(),
     numberOfParticipants: Joi.number().min(1).max(50).required(),
-    locationPreference: Joi.string().valid("on-site", "physical").required(),
+    locationPreference: Joi.string().valid("on-site", "online").required(),
+
+    address: Joi.alternatives().conditional("locationPreference", {
+      is: "on-site",
+      then: Joi.object({
+        street: Joi.string().required().messages({
+          "any.required": "Street is required for on-site bookings.",
+        }),
+        city: Joi.string().required().messages({
+          "any.required": "City is required for on-site bookings.",
+        }),
+        state: Joi.string().required().messages({
+          "any.required": "State is required for on-site bookings.",
+        }),
+      })
+        .required()
+        .messages({
+          "any.required": "Address is required for on-site bookings.",
+        }),
+      otherwise: Joi.forbidden().messages({
+        "any.unknown": "Address should not be provided for online bookings.",
+      }),
+    }),
+
+    gdprConsent: Joi.boolean().valid(true).default(true).required().messages({
+      "any.only": "You must consent to data processing to proceed.",
+    }),
+
     preferredDates: Joi.array().items(Joi.date()).min(1).required(),
   }),
 };
 
-export const createCourseValidation = () => {
-  return validate(
-    createCourseBookingSchema,
-    { context: true },
-    { abortEarly: false },
+// Middleware for validating course creation
+export const createCourseValidation = (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  const { error: validationError } = createCourseBookingSchema.body.validate(
+    req.body,
+    {
+      convert: true,
+      abortEarly: false,
+    },
   );
+
+  if (validationError) {
+    console.error("❌ Joi validation error:", validationError.details);
+    return res.status(400).json({
+      message: "Validation failed",
+      details: validationError.details.map((err) => err.message),
+    });
+  }
+
+  next();
 };
 
+// Middleware for validating booking approval
 export const bookingApprovalValidation = () => {
   return validate(
     bookingApprovalSchema,
