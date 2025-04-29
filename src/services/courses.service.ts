@@ -28,7 +28,10 @@ export const createCourseBookingService = async (data: any) => {
     }
 
     if (!Array.isArray(booking.preferredDates)) {
-      console.error("❗ Preferred dates is not an array:", booking.preferredDates);
+      console.error(
+        "❗ Preferred dates is not an array:",
+        booking.preferredDates,
+      );
       throw new ApiError(400, "Preferred dates must be an array.");
     }
 
@@ -36,7 +39,9 @@ export const createCourseBookingService = async (data: any) => {
       console.error("❗ Preferred dates array is empty!");
     }
 
-    const preferredDateObjects = booking.preferredDates.map((d: string) => new Date(d));
+    const preferredDateObjects = booking.preferredDates.map(
+      (d: string) => new Date(d),
+    );
 
     const bookingData = {
       course: {
@@ -72,7 +77,10 @@ export const createCourseBookingService = async (data: any) => {
       formattedAddress,
     };
 
-    await sendCourseBookingNotification("support@ambertraining.co.uk", emailContent);
+    await sendCourseBookingNotification(
+      "support@ambertraining.co.uk",
+      emailContent,
+    );
     await sendCourseBookingConfirmation(booking.email, emailContent);
 
     return new ApiResponse(
