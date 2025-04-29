@@ -24,8 +24,8 @@
       <li><strong>Price:</strong> £{{course.price}}</li>
       <li><strong>Preferred Dates:</strong> {{formattedPreferredDates}}</li>
       <!-- Conditionally display the address if provided -->
-      {{#if address}}
-        <li><strong>Address:</strong> {{address}}</li>
+      {{#if formattedAddress}}
+          <li style="color: #555; font-size: 14px;"><strong>Address:</strong> {{formattedAddress}}</li>
       {{/if}}
     </ul>
 
