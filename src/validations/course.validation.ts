@@ -17,7 +17,9 @@ const createCourseBookingSchema = {
     phone: Joi.string().min(7).max(20).required(),
     organizationName: Joi.string().allow("").optional(),
     numberOfParticipants: Joi.number().min(1).max(50).required(),
-    locationPreference: Joi.string().valid("on-site", "online").required(),
+    locationPreference: Joi.string()
+      .valid("your-premise", "our-premise", "online")
+      .required(),
 
     address: Joi.alternatives().conditional("locationPreference", {
       is: "on-site",
@@ -71,7 +73,9 @@ const bookingApprovalSchema = {
     phone: Joi.string().min(7).max(20).required(),
     organizationName: Joi.string().allow("").optional(),
     numberOfParticipants: Joi.number().min(1).max(50).required(),
-    locationPreference: Joi.string().valid("on-site", "online").required(),
+    locationPreference: Joi.string()
+      .valid("your-premise", "our-premise", "online")
+      .required(),
 
     address: Joi.alternatives().conditional("locationPreference", {
       is: "on-site",

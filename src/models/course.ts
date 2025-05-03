@@ -16,7 +16,7 @@ const CourseBookingSchema = new Schema(
     numberOfParticipants: { type: Number, required: true },
     locationPreference: {
       type: String,
-      enum: ["on-site", "online"],
+      enum: ["your-premise", "our-premise", "online"],
       required: true,
     },
     preferredDates: [{ type: Date, required: true }],
