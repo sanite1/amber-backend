@@ -22,21 +22,21 @@ const createCourseBookingSchema = {
       .required(),
 
     address: Joi.alternatives().conditional("locationPreference", {
-      is: "on-site",
+      is: "your-premise",
       then: Joi.object({
         street: Joi.string().required().messages({
-          "any.required": "Street is required for on-site bookings.",
+          "any.required": "Street is required for your premise bookings.",
         }),
         city: Joi.string().required().messages({
-          "any.required": "City is required for on-site bookings.",
+          "any.required": "City is required for your premise bookings.",
         }),
         state: Joi.string().required().messages({
-          "any.required": "State is required for on-site bookings.",
+          "any.required": "State is required for your premise bookings.",
         }),
       })
         .required()
         .messages({
-          "any.required": "Address is required for on-site bookings.",
+          "any.required": "Address is required for your premise bookings.",
         }),
       otherwise: Joi.forbidden().messages({
         "any.unknown": "Address should not be provided for online bookings.",
@@ -78,24 +78,24 @@ const bookingApprovalSchema = {
       .required(),
 
     address: Joi.alternatives().conditional("locationPreference", {
-      is: "on-site",
+      is: "your-premise",
       then: Joi.object({
         street: Joi.string().required().messages({
-          "any.required": "Street is required for on-site bookings.",
+          "any.required": "Street is required for your premise booking.",
         }),
         city: Joi.string().required().messages({
-          "any.required": "City is required for on-site bookings.",
+          "any.required": "City is required for your premise booking.",
         }),
         state: Joi.string().required().messages({
-          "any.required": "State is required for on-site bookings.",
+          "any.required": "State is required for your premise booking.",
         }),
       })
         .required()
         .messages({
-          "any.required": "Address is required for on-site bookings.",
+          "any.required": "Address is required for your premise booking.",
         }),
       otherwise: Joi.forbidden().messages({
-        "any.unknown": "Address should not be provided for online bookings.",
+        "any.unknown": "Address should not be provided for online booking.",
       }),
     }),
 
