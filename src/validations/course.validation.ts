@@ -81,21 +81,21 @@ const bookingApprovalSchema = {
       is: "your-premise",
       then: Joi.object({
         street: Joi.string().required().messages({
-          "any.required": "Street is required for your premise bookings.",
+          "any.required": "Street is required for your premise booking.",
         }),
         city: Joi.string().required().messages({
-          "any.required": "City is required for your premise bookings.",
+          "any.required": "City is required for your premise booking.",
         }),
         state: Joi.string().required().messages({
-          "any.required": "State is required for your premise bookings.",
+          "any.required": "State is required for your premise booking.",
         }),
       })
         .required()
         .messages({
-          "any.required": "Address is required for your premise bookings.",
+          "any.required": "Address is required for your premise booking.",
         }),
       otherwise: Joi.forbidden().messages({
-        "any.unknown": "Address should not be provided for online bookings.",
+        "any.unknown": "Address should not be provided for online booking.",
       }),
     }),
 
