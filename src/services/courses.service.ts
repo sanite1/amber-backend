@@ -16,6 +16,7 @@ export const createCourseBookingService = async (data: any) => {
     if (!booking.course) {
       throw new ApiError(400, "Course information is missing in booking.");
     }
+
     if (
       booking.locationPreference === "on-site" &&
       (!booking.address ||
@@ -26,7 +27,6 @@ export const createCourseBookingService = async (data: any) => {
       throw new ApiError(400, "Full address is required for on-site bookings.");
     }
 
-    // Ensure preferredDates is an array
     if (!Array.isArray(booking.preferredDates)) {
       console.error(
         "❗ Preferred dates is not an array:",
@@ -35,10 +35,13 @@ export const createCourseBookingService = async (data: any) => {
       throw new ApiError(400, "Preferred dates must be an array.");
     }
 
-    // Check if preferredDates array is empty
     if (booking.preferredDates.length === 0) {
       console.error("❗ Preferred dates array is empty!");
     }
+
+    const preferredDateObjects = booking.preferredDates.map(
+      (d: string) => new Date(d),
+    );
 
     const bookingData = {
       course: {
@@ -55,22 +58,23 @@ export const createCourseBookingService = async (data: any) => {
       numberOfParticipants: booking.numberOfParticipants,
       locationPreference: booking.locationPreference,
       address: booking.address || "N/A",
-      // Convert preferredDates to Date objects and log the result
-      preferredDates: booking.preferredDates.map((d: string) => {
-        const date = new Date(d);
-        return date;
-      }),
+      preferredDates: preferredDateObjects,
       gdprConsent: true,
     };
 
-    // Format the preferredDates as string
-    const formattedPreferredDates = bookingData.preferredDates
+    const formattedPreferredDates = preferredDateObjects
       .map((date: Date) => date.toLocaleDateString("en-GB"))
       .join(", ");
+
+    const formattedAddress =
+      booking.address && typeof booking.address === "object"
+        ? `${booking.address.street}, ${booking.address.city}, ${booking.address.postcode}`
+        : "";
 
     const emailContent = {
       ...bookingData,
       preferredDates: formattedPreferredDates,
+      formattedAddress,
     };
 
     await sendCourseBookingNotification(
@@ -85,11 +89,7 @@ export const createCourseBookingService = async (data: any) => {
       bookingData,
     );
   } catch (error) {
-    // Handle known ApiErrors
     if (error instanceof ApiError) throw error;
-
-    // Log unexpected errors
-    console.error("❗ Unexpected error in createCourseBookingService:", error);
     throw new ApiError(
       500,
       "Something went wrong while handling the booking request",
@@ -144,9 +144,17 @@ export const approveCourseBookingService = async (data: any) => {
       .map((date: Date) => date.toLocaleDateString("en-GB"))
       .join(", ");
 
+    // ✅ Format the address here
+    const formattedAddress =
+      typeof data.address === "object"
+        ? `${data.address.street}, ${data.address.city}, ${data.address.postcode || data.address.state || ""}`
+        : data.address;
+
+    // Add formattedPreferredDates and formattedAddress to email content
     const emailContent = {
       ...bookingData,
       preferredDates: formattedPreferredDates,
+      formattedAddress, // Add this for use in your template
     };
 
     await sendBookingApprovalEmail(data.email, emailContent);

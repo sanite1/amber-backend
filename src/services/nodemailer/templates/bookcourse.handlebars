@@ -28,7 +28,6 @@
       <li><strong>Certification:</strong> {{course.certification}}</li>
       <li><strong>Price:</strong> £{{course.price}}</li>
     </ul>
-
     <h3 style="color: #ff7c22;">Applicant Details</h3>
     <ul style="list-style: none; padding: 0; color: #555; font-size: 15px;">
       <li><strong>Full Name:</strong> {{fullName}}</li>
@@ -37,12 +36,13 @@
       <li><strong>Organization:</strong> {{organizationName}}</li>
       <li><strong>Number of Participants:</strong> {{numberOfParticipants}}</li>
       <li><strong>Location Preference:</strong> {{locationPreference}}</li>
-      {{#if address}}
-        <li><strong>Address:</strong> {{address}}</li>
+      {{#if formattedAddress}}
+        <li><strong>Address:</strong>
+          <span style="color: #555;">{{formattedAddress}}</span></li>
       {{/if}}
-      <li><strong>Preferred Dates:</strong> {{preferredDates}}</li>
+      <li><strong>Preferred Dates:</strong>
+        <span style="color: #555;">{{preferredDates}}</span></li>
     </ul>
-
     <p style="font-size: 15px; color: #666; margin-top: 30px;">Please review the
       request at your earliest convenience.</p>
   </div>
