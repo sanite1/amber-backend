@@ -24,6 +24,7 @@ import {
   loginService,
   reesetPasswordService,
   refreshService,
+  unsubscribeService,
   updatePasswordService,
   updateUserService,
   verifyMailService,
@@ -216,6 +217,24 @@ export const getTutors = async (
     res
       .status(200)
       .json(new ApiResponse(200, "Tutor retrieved successfully", tutors));
+  } catch (error) {
+    next(error);
+  }
+};
+
+//get all tutors
+export const unsubscribe = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    //check if user can be found (Not Done)
+    const notification = await unsubscribeService(req.body);
+
+    return res
+      .status(200)
+      .json(new ApiResponse(200, "Operation Successful", notification));
   } catch (error) {
     next(error);
   }

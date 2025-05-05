@@ -8,6 +8,7 @@ import {
   refreshTokenValidation,
   resetPassswordValidation,
   sendEmailValidation,
+  unsubscribeUserValidation,
   updatePassswordValidation,
   updateUserValidation,
   verifyUserValidation,
@@ -22,6 +23,7 @@ import {
   refresh,
   resetPassword,
   sendEmailToClient,
+  unsubscribe,
   updatePassword,
   updateUser,
   verifyUser,
@@ -46,6 +48,8 @@ router
   .post(upload.single("invoice"), sendEmailValidation(), sendEmailToClient);
 
 router.get("/tutors", getTutorsValidation(), getTutors);
+
+router.post("/unsubscribe", unsubscribeUserValidation(), unsubscribe);
 
 router
   .route("/:id")
