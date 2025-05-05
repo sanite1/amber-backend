@@ -156,3 +156,20 @@ export const sendBookingApprovalEmail = async (email: string, data: any) => {
     throw new ApiError(500, `Error sending booking approval email: ${error}`);
   }
 };
+
+// SendUnsubscribe
+export const sendUnsubscribeEmail = async (email: string, name: any) => {
+  const mailOptions = {
+    from: `"Amber Training" <${process.env.AUTH_EMAIL}>`,
+    to: process.env.AUTH_EMAIL,
+    subject: "Unsubscribe Request",
+    template: "./unsubscribe",
+    context: { name, email },
+  };
+
+  try {
+    await transporter.sendMail(mailOptions);
+  } catch (error) {
+    throw new ApiError(500, `Error sending unsubscribe email: ${error}`);
+  }
+};

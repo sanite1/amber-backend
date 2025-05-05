@@ -1,0 +1,88 @@
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>User Unsubscribe Request</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #f4f4f4;
+        margin: 0;
+        padding: 0;
+      }
+      .container {
+        max-width: 600px;
+        margin: 30px auto;
+        background: #ffffff;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+      }
+      .header {
+        padding-bottom: 10px;
+      }
+      .header img {
+        max-width: 150px;
+      }
+      .content {
+        padding: 20px 0;
+      }
+      h2 {
+        color: #333;
+      }
+      p {
+        color: #666;
+        font-size: 16px;
+      }
+      .highlight-box {
+        background: #f9f9f9;
+        padding: 15px;
+        border-left: 4px solid #ff7c22;
+        margin: 20px 0;
+        border-radius: 5px;
+      }
+      .footer {
+        margin-top: 30px;
+        font-size: 12px;
+        color: #888;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <!-- Header -->
+      <div class="header">
+        <img
+          src="https://res.cloudinary.com/dv4uk8qqc/image/upload/v1745396912/Amber_Users/vs3ygjavp7jwjp7gdqws.png"
+          alt="Amber Training Logo"
+        />
+      </div>
+
+      <!-- Content -->
+      <div class="content">
+        <h2>User Unsubscribe Request</h2>
+        <p>The following user has requested to be removed from your mailing
+          list:</p>
+
+        <div class="highlight-box">
+          <p><strong>Name:</strong> {{name}}</p>
+          <p><strong>Email:</strong> {{email}}</p>
+        </div>
+
+        <p>Please take the necessary action to unsubscribe this user from the
+          platform.</p>
+
+        <p style="font-size: 14px; color: #666; margin-top: 20px;">
+          If you need to verify this request or follow up, please reach out
+          directly to the user.
+        </p>
+      </div>
+
+      <!-- Footer -->
+      <div class="footer">
+        <p>Amber Training &copy; 2025</p>
+
+      </div>
+    </div>
+  </body>
+</html>

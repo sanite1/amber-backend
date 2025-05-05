@@ -138,6 +138,12 @@ const resetPasswordSchema = {
     password: Joi.string().required(),
   }),
 };
+const unsubscribeSchema = {
+  body: Joi.object({
+    name: Joi.string().required(),
+    email: Joi.string().required(),
+  }),
+};
 const updatePasswordSchema = {
   params: Joi.object({
     id: Joi.string()
@@ -195,7 +201,9 @@ export const getUserByIdValidation = () => {
 export const loginUserValidation = () => {
   return validate(loginUserSchema, { context: true }, { abortEarly: false });
 };
-
+export const unsubscribeUserValidation = () => {
+  return validate(unsubscribeSchema, { context: true }, { abortEarly: false });
+};
 export const refreshTokenValidation = () => {
   return validate(refreshTokenSchema, { context: true }, { abortEarly: false });
 };

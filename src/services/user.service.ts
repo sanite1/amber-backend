@@ -12,6 +12,7 @@ import User from "../models/User";
 import * as bcrypt from "bcrypt";
 import { randomBytes } from "crypto";
 import {
+  sendUnsubscribeEmail,
   sendVerificationMail,
   sendforgotPasswordMail,
 } from "./nodemailer/mail.service";
@@ -251,4 +252,12 @@ export const getTutorsService = async (filters: UserFilterOptions) => {
   if (filters.verified !== undefined) query.verified = filters.verified;
 
   return await User.find(query);
+};
+
+export const unsubscribeService = async (data: {
+  name: string;
+  email: string;
+}) => {
+  await sendUnsubscribeEmail(data.email, data.name);
+  return new ApiResponse(200, "Successfully unsubscribed");
 };
