@@ -261,7 +261,10 @@ export const getLessonsForStudent = async (
   }
 
   // Fetch lessons
-  const lessons = await Lesson.find(query);
+  const lessons = await Lesson.find(query).populate({
+    path: "studentId",
+    select: "firstname lastname email",
+  });
 
   return new ApiResponse(200, "Lessons fetched successfully", lessons);
 };
