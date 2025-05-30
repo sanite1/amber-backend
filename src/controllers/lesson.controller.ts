@@ -4,6 +4,7 @@ import {
   createLesson,
   getAllLessons,
   getLessonById,
+  getLessonsForStudent,
   getLessonsForTutor,
   updateLesson,
   updateLessonStatus,
@@ -142,7 +143,7 @@ export const getStudentLessons = async (
     const { studentId } = req.params;
     const { status } = req.query;
 
-    const lessons = await getLessonsForTutor(studentId, status as string);
+    const lessons = await getLessonsForStudent(studentId, status as string);
     return res.status(200).json(lessons);
   } catch (error) {
     next(error);
