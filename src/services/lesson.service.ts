@@ -79,7 +79,6 @@ export const createLesson = async (
   const endTime = moment.utc(date).add(duration, "minutes").toISOString();
 
   // Create a Google Calendar event
-  // (Adjust the summary and description as needed. Here we use tutor and student last names.)
 
   const studentWithToken = await User.findOne({ email: student.email });
 
@@ -262,7 +261,7 @@ export const getLessonsForStudent = async (
 
   // Fetch lessons
   const lessons = await Lesson.find(query).populate({
-    path: "studentId",
+    path: "tutorId",
     select: "firstname lastname email",
   });
 
