@@ -24,7 +24,12 @@ export const createPayment = async (
       line_items: items.map((item: any) => ({
         price_data: {
           currency: "gbp",
-          product_data: { name: item.name },
+          product_data: {
+            name: item.name,
+            images: [
+              "https://res.cloudinary.com/dv4uk8qqc/image/upload/v1750163575/Amber_Users/s3xdjwnn5e3pjeggiffv.jpg",
+            ],
+          },
           unit_amount: item.price * 100, // $10.00 → 1000
         },
         quantity: item.quantity,
