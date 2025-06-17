@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from "express";
 import { createReviewService } from "../services/review.service";
 import ApiError from "../errors/apiError";
 import ApiResponse from "../errors/apiResponse";
+import { sendOurVeBookingNotification } from "../services/nodemailer/mail.service";
 const express = require("express");
 const Stripe = require("stripe");
 const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
@@ -38,7 +39,7 @@ export const createPayment = async (
       cancel_url: `${domain}/course-dates`,
     });
 
-    console.log(`${domain}/booking-confirmed`);
+    sendOurVeBookingNotification(items[0]);
 
     return res
       .status(201)
