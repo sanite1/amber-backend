@@ -23,14 +23,14 @@ export const createPayment = async (
       mode: "payment",
       line_items: items.map((item: any) => ({
         price_data: {
-          currency: "usd",
+          currency: "gbp",
           product_data: { name: item.name },
           unit_amount: item.price * 100, // $10.00 → 1000
         },
         quantity: item.quantity,
       })),
       success_url: `${domain}/booking-confirmed`,
-      cancel_url: "http://localhost:3000/cancel",
+      cancel_url: `${domain}/course-dates`,
     });
 
     console.log(`${domain}/booking-confirmed`);
