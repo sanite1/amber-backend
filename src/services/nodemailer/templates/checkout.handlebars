@@ -1,0 +1,106 @@
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Pending Course Purchase</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #f4f4f4;
+        margin: 0;
+        padding: 0;
+      }
+      .container {
+        max-width: 600px;
+        margin: 30px auto;
+        background: #ffffff;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+      }
+      .header {
+        padding-bottom: 10px;
+      }
+      .header img {
+        max-width: 150px;
+      }
+      .content {
+        padding: 20px 0;
+      }
+      h2 {
+        color: #333;
+      }
+      p {
+        color: #666;
+        font-size: 16px;
+      }
+      .footer {
+        margin-top: 30px;
+        font-size: 12px;
+        color: #888;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <!-- Header -->
+      <div class="header">
+        <img
+          src="https://res.cloudinary.com/dv4uk8qqc/image/upload/v1745396912/Amber_Users/vs3ygjavp7jwjp7gdqws.png"
+          alt="Amber Training Logo"
+        />
+      </div>
+
+      <!-- Content -->
+      <div class="content">
+        <h2>New Pending Course Purchase</h2>
+        <p>
+          A customer is currently in the process of purchasing the course
+          <strong>{{name}}</strong>.
+        </p>
+
+        <div
+          style="background: #f9f9f9; padding: 15px; border-left: 4px solid #ff7c22; margin: 20px 0; border-radius: 5px;"
+        >
+          <p style="font-size: 16px; color: #333;"><strong>Course Name:</strong>
+            {{name}}</p>
+          <p style="font-size: 16px; color: #333;"><strong>Course Date:</strong>
+            {{date}}</p>
+          <p style="font-size: 16px; color: #333;"><strong>Price:</strong>
+            £{{price}}</p>
+          <p style="font-size: 16px; color: #333;"><strong>Quantity:</strong>
+            {{quantity}}</p>
+        </div>
+
+        <h3 style="color: #333;">Student Details</h3>
+        <p><strong>Full Name:</strong> {{student.fullName}}</p>
+        <p><strong>Email:</strong> {{student.email}}</p>
+        <p><strong>Phone:</strong> {{student.phone}}</p>
+        <p><strong>Address:</strong> {{student.address}}</p>
+
+        <p style="margin-top: 20px;">
+          Please visit the
+          <strong>Stripe Dashboard</strong>
+          to confirm if the order has been completed. If payment is not
+          confirmed, consider reaching out to the student at
+          <strong>{{student.email}}</strong>
+          to check if they encountered any issues during the payment process.
+        </p>
+
+        <a
+          href="https://dashboard.stripe.com/"
+          class="button"
+          style="display: inline-block; background: #ff7c22; color: #ffffff; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold; margin-top: 20px;"
+        >
+          Go to Stripe Dashboard
+        </a>
+      </div>
+
+      <!-- Footer -->
+      <div class="footer">
+        <p>Amber Training &copy; 2025</p>
+        <p>Sent automatically from Amber Training booking system</p>
+      </div>
+    </div>
+  </body>
+</html>

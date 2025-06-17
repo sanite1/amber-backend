@@ -5,6 +5,7 @@ import transporter from "./nodemailer";
 import { CourseBooking } from "../../interfaces/coursebooking.interface";
 import path from "path";
 import fs from "fs";
+import { CheckoutItem } from "../../interfaces/payment.interface";
 
 const DOMAIN_NAME = process.env.DOMAIN_NAME;
 export const sendVerificationMail = async (userInfo: IUser) => {
@@ -106,8 +107,26 @@ export const sendCourseBookingNotification = async (
     from: `"Amber Training" <${process.env.AUTH_EMAIL}>`,
     to: adminEmail,
     subject: "New Course Booking Received",
-    template: "./bookcourse", // this corresponds to bookcourse.handlebars
+    template: "./bookcourse",
     context: booking,
+  };
+
+  try {
+    await transporter.sendMail(mailOptions);
+  } catch (error) {
+    throw new ApiError(500, `Error sending course booking email: ${error}`);
+  }
+};
+
+//Send Booking notification for our venue
+export const sendOurVeBookingNotification = async (details: CheckoutItem) => {
+  const mailOptions = {
+    from: `"Amber Training" <${process.env.AUTH_EMAIL}>`,
+    // to: "csanni52@gmail.com",
+    to: process.env.AUTH_EMAIL,
+    subject: "New Course Booking Received",
+    template: "./checkout",
+    context: details,
   };
 
   try {
