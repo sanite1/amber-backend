@@ -41,7 +41,7 @@ export const createPayment = async (
     console.log("before sending the email");
     console.log(items[0]);
 
-    sendOurVeBookingNotification(items[0]);
+    await sendOurVeBookingNotification(items[0]);
     console.log("after sending the email");
 
     return res
