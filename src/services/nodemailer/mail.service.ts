@@ -122,8 +122,7 @@ export const sendCourseBookingNotification = async (
 export const sendOurVeBookingNotification = async (details: CheckoutItem) => {
   const mailOptions = {
     from: `"Amber Training" <${process.env.AUTH_EMAIL}>`,
-    // to: "support@ambertraining.co.uk",
-    to: "csanni52@gmail.com",
+    to: process.env.AUTH_EMAIL,
     subject: "New Course Booking Received",
     template: "./checkout",
     context: details,
