@@ -135,6 +135,8 @@ export const sendOurVeBookingNotification = async (details: CheckoutItem) => {
   } catch (error) {
     throw new ApiError(500, `Error sending course booking email: ${error}`);
   }
+
+  return true;
 };
 
 //Send User notification
