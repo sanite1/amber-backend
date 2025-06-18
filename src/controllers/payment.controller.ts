@@ -17,6 +17,11 @@ export const createPayment = async (
 
   const domain = process.env.DOMAIN_NAME;
   console.log(`${domain}/booking-confirmed`);
+
+  console.log("Environment:", process.env.NODE_ENV);
+  console.log("Domain:", domain);
+  console.log("Items received:", JSON.stringify(items, null, 2));
+
   try {
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
@@ -38,11 +43,55 @@ export const createPayment = async (
       cancel_url: `${domain}/course-dates`,
     });
 
-    console.log("before sending the email");
-    console.log(items[0]);
+    console.log("Stripe session created successfully:", session.id);
+    console.log("About to send email to:", items[0].student?.email);
 
-    sendOurVeBookingNotification(items[0]);
-    console.log("after sending the email");
+    try {
+      const emailResult = await sendOurVeBookingNotification(items[0]);
+      console.log("Email sent successfully:", emailResult);
+    } catch (emailError) {
+      console.error("Email sending failed:", emailError);
+      // console.error('Email error details:', emailError.message, emailError.stack);
+      // Continue with payment creation even if email fails
+    }
+
+    return res
+      .status(201)
+      .json(new ApiResponse(201, "Payment created", { id: session.id }));
+  } catch (err) {
+    console.error("Stripe session error:", err);
+    res.status(500).json({ error: "Something went wrong" });
+  }
+};
+
+export const createPayment2 = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  const { items } = req.body;
+  const domain = process.env.DOMAIN_NAME;
+
+  console.log("Environment:", process.env.NODE_ENV);
+  console.log("Domain:", domain);
+  console.log("Items received:", JSON.stringify(items, null, 2));
+
+  try {
+    const session = await stripe.checkout.sessions.create({
+      // ... existing config
+    });
+
+    console.log("Stripe session created successfully:", session.id);
+    console.log("About to send email to:", items[0].student?.email);
+
+    try {
+      const emailResult = await sendOurVeBookingNotification(items[0]);
+      console.log("Email sent successfully:", emailResult);
+    } catch (emailError) {
+      console.error("Email sending failed:", emailError);
+      // console.error('Email error details:', emailError.message, emailError.stack);
+      // Continue with payment creation even if email fails
+    }
 
     return res
       .status(201)
