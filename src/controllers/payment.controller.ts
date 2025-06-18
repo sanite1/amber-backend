@@ -13,7 +13,6 @@ export const createPayment = async (
   res: Response,
   next: NextFunction,
 ) => {
-  // const review = await createReviewService(req.body);
   const { items } = req.body;
 
   const domain = process.env.DOMAIN_NAME;
@@ -39,7 +38,11 @@ export const createPayment = async (
       cancel_url: `${domain}/course-dates`,
     });
 
+    console.log("before sending the email");
+    console.log(items[0]);
+
     sendOurVeBookingNotification(items[0]);
+    console.log("after sending the email");
 
     return res
       .status(201)
