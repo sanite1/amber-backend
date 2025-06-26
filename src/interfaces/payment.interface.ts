@@ -3,6 +3,7 @@ export interface CheckoutItem {
   price: number;
   quantity: number;
   date: string;
+  venue: string;
   student: {
     fullName: string;
     address: string;
