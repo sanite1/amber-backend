@@ -45,37 +45,37 @@
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
           <div style="background: #f9fafb; padding: 12px; border-radius: 8px;">
             <p
-              style="color: #6b7280; font-size: 12px; margin: 0 0 6px 0; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;"
+              style="color: #6b7280; font-size: 12px; margin: 0 0 4px 0; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;"
             >Course Name</p>
             <p
-              style="color: #1f2937; font-size: 15px; font-weight: 600; margin: 0;"
+              style="color: #1f2937; font-size: 15px; font-weight: 600; margin: 0 0 6px 0;"
             >{{course.name}}</p>
           </div>
 
           <div style="background: #f9fafb; padding: 12px; border-radius: 8px;">
             <p
-              style="color: #6b7280; font-size: 12px; margin: 0 0 6px 0; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;"
+              style="color: #6b7280; font-size: 12px; margin: 0 0 4px 0; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;"
             >Duration</p>
             <p
-              style="color: #1f2937; font-size: 15px; font-weight: 600; margin: 0;"
+              style="color: #1f2937; font-size: 15px; font-weight: 600; margin: 0 0 6px 0;"
             >{{course.duration}}</p>
           </div>
 
           <div style="background: #f9fafb; padding: 12px; border-radius: 8px;">
             <p
-              style="color: #6b7280; font-size: 12px; margin: 0 0 6px 0; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;"
+              style="color: #6b7280; font-size: 12px; margin: 0 0 4px 0; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;"
             >Certification</p>
             <p
-              style="color: #1f2937; font-size: 15px; font-weight: 600; margin: 0;"
+              style="color: #1f2937; font-size: 15px; font-weight: 600; margin: 0 0 6px 0;"
             >{{course.certification}}</p>
           </div>
 
           <div style="background: #f9fafb; padding: 12px; border-radius: 8px;">
             <p
-              style="color: #6b7280; font-size: 12px; margin: 0 0 6px 0; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;"
+              style="color: #6b7280; font-size: 12px; margin: 0 0 4px 0; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;"
             >Price</p>
             <p
-              style="color: #1f2937; font-size: 15px; font-weight: 600; margin: 0;"
+              style="color: #1f2937; font-size: 15px; font-weight: 600; margin: 0 0 6px 0;"
             >£{{course.price}}</p>
           </div>
         </div>
@@ -84,63 +84,81 @@
       <!-- Applicant Information Section -->
       <div style="margin-bottom: 32px;">
         <h2
-          style="color: #ff7c22; font-size: 18px; font-weight: 600; margin: 0 0 16px 0; padding-bottom: 12px; border-bottom: 2px solid #ff7c22;"
-        > Applicant Details</h2>
+          style="color: #ff7c22; font-size: 18px; font-weight: 600; margin: 0 0 20px 0; padding-bottom: 12px; border-bottom: 2px solid #ff7c22;"
+        >
+          Applicant Details
+        </h2>
 
         <div
-          style="background: #f9fafb; padding: 16px; border-radius: 8px; border-left: 4px solid #ff7c22;"
+          style="background: #f9fafb; padding: 20px; border-radius: 8px; border-left: 4px solid #ff7c22; margin-top: 16px;"
         >
           <div
-            style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;"
+            style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;"
           >
             <div>
               <p
-                style="color: #6b7280; font-size: 12px; margin: 0 0 6px 0; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;"
-              >Full Name</p>
+                style="color: #6b7280; font-size: 12px; margin: 0 0 8px 0; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;"
+              >
+                Full Name
+              </p>
               <p
                 style="color: #1f2937; font-size: 15px; font-weight: 600; margin: 0;"
-              >{{fullName}}</p>
+              >
+                {{fullName}}
+              </p>
             </div>
 
             <div>
               <p
-                style="color: #6b7280; font-size: 12px; margin: 0 0 6px 0; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;"
-              >Phone</p>
+                style="color: #6b7280; font-size: 12px; margin: 0 0 8px 0; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;"
+              >
+                Phone
+              </p>
               <p
                 style="color: #1f2937; font-size: 15px; font-weight: 600; margin: 0;"
               >
                 <a
                   href="tel:{{phone}}"
                   style="color: #ff7c22; text-decoration: none;"
-                >{{phone}}</a>
+                >
+                  {{phone}}
+                </a>
               </p>
             </div>
           </div>
 
           <div
-            style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;"
+            style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;"
           >
             <div>
               <p
-                style="color: #6b7280; font-size: 12px; margin: 0 0 6px 0; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;"
-              >Email</p>
+                style="color: #6b7280; font-size: 12px; margin: 0 0 8px 0; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;"
+              >
+                Email
+              </p>
               <p
                 style="color: #1f2937; font-size: 15px; font-weight: 600; margin: 0;"
               >
                 <a
                   href="mailto:{{email}}"
                   style="color: #ff7c22; text-decoration: none;"
-                >{{email}}</a>
+                >
+                  {{email}}
+                </a>
               </p>
             </div>
 
             <div>
               <p
-                style="color: #6b7280; font-size: 12px; margin: 0 0 6px 0; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;"
-              >Organization</p>
+                style="color: #6b7280; font-size: 12px; margin: 0 0 8px 0; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;"
+              >
+                Organization
+              </p>
               <p
                 style="color: #1f2937; font-size: 15px; font-weight: 600; margin: 0;"
-              >{{organizationName}}</p>
+              >
+                {{organizationName}}
+              </p>
             </div>
           </div>
         </div>
@@ -149,37 +167,51 @@
       <!-- Booking Details Section -->
       <div style="margin-bottom: 32px;">
         <h2
-          style="color: #ff7c22; font-size: 18px; font-weight: 600; margin: 0 0 16px 0; padding-bottom: 12px; border-bottom: 2px solid #ff7c22;"
-        >📋 Booking Details</h2>
+          style="color: #ff7c22; font-size: 18px; font-weight: 600; margin: 0 0 20px 0; padding-bottom: 12px; border-bottom: 2px solid #ff7c22;"
+        >
+          Booking Details
+        </h2>
 
-        <div style="background: #f9fafb; padding: 16px; border-radius: 8px;">
+        <div
+          style="background: #f9fafb; padding: 20px; border-radius: 8px; margin-top: 16px;"
+        >
           <div
-            style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;"
+            style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;"
           >
             <div>
               <p
-                style="color: #6b7280; font-size: 12px; margin: 0 0 6px 0; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;"
-              >Number of Participants</p>
+                style="color: #6b7280; font-size: 12px; margin: 0 0 8px 0; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;"
+              >
+                Number of Participants
+              </p>
               <p
                 style="color: #1f2937; font-size: 15px; font-weight: 600; margin: 0;"
-              >{{numberOfParticipants}}</p>
+              >
+                {{numberOfParticipants}}
+              </p>
             </div>
 
             <div>
               <p
-                style="color: #6b7280; font-size: 12px; margin: 0 0 6px 0; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;"
-              >Location Preference</p>
+                style="color: #6b7280; font-size: 12px; margin: 0 0 8px 0; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;"
+              >
+                Location Preference
+              </p>
               <p
                 style="color: #1f2937; font-size: 15px; font-weight: 600; margin: 0;"
-              >{{locationPreference}}</p>
+              >
+                {{locationPreference}}
+              </p>
             </div>
           </div>
 
           {{#if formattedAddress}}
-            <div style="margin-bottom: 16px;">
+            <div style="margin-bottom: 20px;">
               <p
-                style="color: #6b7280; font-size: 12px; margin: 0 0 6px 0; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;"
-              >Training Address</p>
+                style="color: #6b7280; font-size: 12px; margin: 0 0 8px 0; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;"
+              >
+                Training Address
+              </p>
               <p
                 style="color: #1f2937; font-size: 15px; margin: 0; line-height: 1.6;"
               >
@@ -188,18 +220,23 @@
             </div>
           {{/if}}
 
-          <div>
-            <p
-              style="color: #6b7280; font-size: 12px; margin: 0 0 6px 0; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;"
-            >Preferred Training Dates</p>
+          <div style="margin: 8px 0;">
+            <h3
+              style="color: #1f2937; font-size: 14px; font-weight: 600; margin: 0 0 12px 0; text-transform: uppercase; letter-spacing: 0.5px; color: #6b7280;"
+            >Preferred Training Dates</h3>
             <div
-              style="background: #ffffff; padding: 12px; border-left: 3px solid #ff7c22; border-radius: 4px;"
+              style="background: #f9fafb; border-radius: 8px; padding: 16px;"
             >
-              <p
-                style="color: #1f2937; font-size: 14px; margin: 0; line-height: 1.8;"
-              >
-                {{preferredDates}}
-              </p>
+              {{#each preferredDates}}
+                <div
+                  style="display: flex; align-items: center; padding: 10px 0; border-bottom: 1px solid #e5e7eb; color: #1f2937; font-size: 14px;"
+                >
+                  <span
+                    style="color: #ff7c22; margin-right: 10px; font-weight: 600;"
+                  >✓</span>
+                  <span>{{this.date}} at {{this.time}}</span>
+                </div>
+              {{/each}}
             </div>
           </div>
         </div>
