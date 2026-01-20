@@ -10,7 +10,7 @@ export interface CourseBooking {
   organizationName?: string;
   numberOfParticipants: number;
   locationPreference: "your-premise" | "our-premise" | "online";
-  preferredDates: Date[];
+  preferredDates: { date: Date; time: string }[];
   paymentStatus?: "pending" | "paid";
   status?: "pending" | "approved";
   createdAt?: Date;

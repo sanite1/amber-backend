@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from "express";
 import {
   createCourseBookingService,
   approveCourseBookingService,
+  getAllBookedDatesService,
 } from "../services/courses.service";
 import ApiResponse from "../errors/apiResponse";
 import ApiError from "../errors/apiError";
@@ -30,7 +31,6 @@ export const createCourseBookingController = async (
 };
 
 // Approve Course Booking
-// Approve Course Booking
 export const approveCourseBookingController = async (
   req: Request,
   res: Response,
@@ -52,5 +52,28 @@ export const approveCourseBookingController = async (
 
     console.error("❗ Failed to approve course booking:", error);
     return next(new ApiError(500, "Failed to approve course booking"));
+  }
+};
+
+export const getAllBookedDatesController = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const bookingDates = await getAllBookedDatesService();
+    return res
+      .status(200)
+      .json(new ApiResponse(200, "Booking dates fetched", bookingDates));
+  } catch (error) {
+    if (error instanceof ApiError) {
+      return res.status(error.statusCode).json({
+        status: error.statusCode,
+        message: error.message,
+      });
+    }
+
+    console.error("❗ Failed to fetch booking dates:", error);
+    return next(new ApiError(500, "Failed to fetch booking dates"));
   }
 };

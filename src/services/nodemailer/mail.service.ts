@@ -101,7 +101,7 @@ export const sendNotificationMail = async (user: IUser, message: string) => {
 //Send Admin notification
 export const sendCourseBookingNotification = async (
   adminEmail: string,
-  booking: CourseBooking,
+  booking: any,
 ) => {
   const mailOptions = {
     from: `"Amber Training" <${process.env.AUTH_EMAIL}>`,

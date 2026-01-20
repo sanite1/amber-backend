@@ -1,5 +1,8 @@
 import express from "express";
-import { createCourseBookingController } from "../controllers/course.controller";
+import {
+  createCourseBookingController,
+  getAllBookedDatesController,
+} from "../controllers/course.controller";
 import {
   isAdmin,
   isAuthenticated,
@@ -10,6 +13,8 @@ import { approveCourseBookingController } from "../controllers/course.controller
 const router = express.Router();
 
 router.post("/book", createCourseValidation, createCourseBookingController);
+
+router.get("/bookings/dates", getAllBookedDatesController);
 
 router.post("/bookings/approve", approveCourseBookingController);
 
