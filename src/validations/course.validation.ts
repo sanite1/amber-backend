@@ -7,7 +7,7 @@ const createCourseBookingSchema = {
     course: Joi.object({
       name: Joi.string().required(),
       duration: Joi.string().required(),
-      mode: Joi.string().required(),
+      // mode: Joi.string().required(),
       certification: Joi.string().required(),
       price: Joi.string().required(),
     }).required(),
@@ -39,7 +39,8 @@ const createCourseBookingSchema = {
           "any.required": "Address is required for your premise bookings.",
         }),
       otherwise: Joi.forbidden().messages({
-        "any.unknown": "Address should not be provided for online bookings.",
+        "any.unknown":
+          "Address should only be provided for bookings on your premise.",
       }),
     }),
 
@@ -49,12 +50,27 @@ const createCourseBookingSchema = {
 
     preferredDates: Joi.array()
       .items(
-        Joi.string().isoDate().messages({
-          "string.isoDate": "Each preferred date must be a valid ISO date",
+        Joi.object({
+          date: Joi.string().isoDate().required().messages({
+            "string.isoDate": "Each date must be a valid ISO date (YYYY-MM-DD)",
+            "any.required": "Date is required",
+          }),
+          time: Joi.string()
+            .pattern(/^([01]?[0-9]|2[0-3]):[0-5][0-9]$/)
+            .required()
+            .messages({
+              "string.pattern.base":
+                "Each time must be in HH:MM format (24-hour)",
+              "any.required": "Time is required",
+            }),
         }),
       )
       .min(1)
-      .required(),
+      .required()
+      .messages({
+        "array.min": "At least one date and time must be selected",
+        "any.required": "Preferred dates are required",
+      }),
   }),
 };
 

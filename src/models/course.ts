@@ -19,7 +19,12 @@ const CourseBookingSchema = new Schema(
       enum: ["your-premise", "our-premise", "online"],
       required: true,
     },
-    preferredDates: [{ type: Date, required: true }],
+    preferredDates: [
+      {
+        date: { type: Date, required: true },
+        time: { type: String, required: true }, // HH:MM format
+      },
+    ],
     paymentStatus: {
       type: String,
       enum: ["pending", "paid"],
