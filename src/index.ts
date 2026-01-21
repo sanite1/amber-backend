@@ -18,21 +18,50 @@ import paymentRoutes from "./routes/payment.routes";
 import "./cron/studentCron";
 import "./cron/tutorCron";
 
-const PORT = 4000;
+const PORT = process.env.PORT || 4000;
 
 const app = express();
 
 app.use(express.json());
+app.use(express.urlencoded({ limit: "10mb", extended: true }));
 
-const corsOption = {
-  origin: "*",
+// Define allowed origins
+const allowedOrigins = [
+  "https://ambertraining.co.uk",
+  "https://www.ambertraining.co.uk",
+  "https://booking.ambertraining.co.uk",
+  "http://localhost:3000",
+  "http://localhost:5173",
+  process.env.FRONTEND_URL,
+].filter(Boolean); // Remove undefined values
+
+const corsOptions = {
+  origin: (origin: any, callback: any) => {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+
+    if (allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      console.warn(`CORS blocked request from origin: ${origin}`);
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
   credentials: true,
+  methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+  optionsSuccessStatus: 200,
+  maxAge: 3600,
 };
-app.use(cors(corsOption));
+
+app.use(cors(corsOptions));
+
+// Handle preflight requests
+app.options("*", cors(corsOptions));
 
 connectDb();
 
-//Routes
+// Routes
 app.use("/api/users", userRoutes);
 app.use("/api/reviews", reviewRoutes);
 app.use("/api/notifications", notificationRoutes);
@@ -45,9 +74,11 @@ app.use("/api/courses", bookCourseRoutes);
 app.use("/api/payment", paymentRoutes);
 
 app.listen(PORT, () => {
-  console.log("Server Listening on port 4000...");
+  console.log(`Server Listening on port ${PORT}...`);
 });
+
 app.all("*", (req, _res, next) => {
   next(new ApiError(404, `Can't find ${req.originalUrl} on the server!`));
 });
+
 app.use(globalErrorHandler);
