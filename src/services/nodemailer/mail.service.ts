@@ -178,6 +178,50 @@ export const sendBookingApprovalEmail = async (email: string, data: any) => {
   }
 };
 
+// Website enquiry / contact form -> lands in the Amber Training inbox.
+export interface EnquiryPayload {
+  firstName: string;
+  lastName?: string;
+  email: string;
+  phone?: string;
+  message: string;
+  courseInterest?: string;
+  source?: string;
+}
+
+export const sendEnquiryMail = async (enquiry: EnquiryPayload) => {
+  const fullName = `${enquiry.firstName} ${enquiry.lastName || ""}`.trim();
+  const html = `
+    <h2>New website enquiry</h2>
+    <p><strong>Name:</strong> ${fullName}</p>
+    <p><strong>Email:</strong> ${enquiry.email}</p>
+    <p><strong>Phone:</strong> ${enquiry.phone || "Not provided"}</p>
+    <p><strong>Course interest:</strong> ${enquiry.courseInterest || "Not specified"}</p>
+    <p><strong>Message:</strong></p>
+    <p>${(enquiry.message || "").replace(/\n/g, "<br/>")}</p>
+    <hr/>
+    <p style="color:#888;font-size:12px;">Sent from ${enquiry.source || "ambertraining.co.uk"}</p>
+  `;
+
+  const mailOptions = {
+    from: `"Amber Training Website" <${process.env.AUTH_EMAIL}>`,
+    to: process.env.AUTH_EMAIL,
+    replyTo: enquiry.email,
+    subject: `New enquiry from ${fullName}${
+      enquiry.courseInterest ? ` – ${enquiry.courseInterest}` : ""
+    }`,
+    html,
+  };
+
+  try {
+    await transporter.sendMail(mailOptions);
+  } catch (error) {
+    throw new ApiError(500, `Error sending enquiry email: ${error}`);
+  }
+
+  return true;
+};
+
 // SendUnsubscribe
 export const sendUnsubscribeEmail = async (email: string, name: any) => {
   const mailOptions = {
