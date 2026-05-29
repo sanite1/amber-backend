@@ -178,6 +178,79 @@ export const sendBookingApprovalEmail = async (email: string, data: any) => {
   }
 };
 
+// B2B on-site training booking / quote request -> lands in the inbox.
+export interface BookingEnquiryPayload {
+  companyName: string;
+  contactName: string;
+  email: string;
+  phone?: string;
+  courseType: string; // EFAW | FAW
+  delegates?: string | number;
+  preferredDates?: string;
+  venueAddress?: string;
+  specialRequirements?: string;
+  source?: string;
+}
+
+const esc = (v: unknown) =>
+  String(v ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+
+export const sendBookingEnquiryMail = async (b: BookingEnquiryPayload) => {
+  const html = `
+    <h2>New on-site first aid training booking request</h2>
+    <table cellpadding="6" style="border-collapse:collapse;font-family:Arial,sans-serif;">
+      <tr><td><strong>Company</strong></td><td>${esc(b.companyName)}</td></tr>
+      <tr><td><strong>Contact</strong></td><td>${esc(b.contactName)}</td></tr>
+      <tr><td><strong>Email</strong></td><td>${esc(b.email)}</td></tr>
+      <tr><td><strong>Phone</strong></td><td>${esc(b.phone) || "Not provided"}</td></tr>
+      <tr><td><strong>Course</strong></td><td>${esc(b.courseType)}</td></tr>
+      <tr><td><strong>Delegates</strong></td><td>${esc(b.delegates) || "Not specified"}</td></tr>
+      <tr><td><strong>Preferred dates</strong></td><td>${esc(b.preferredDates) || "Flexible"}</td></tr>
+      <tr><td><strong>Venue address</strong></td><td>${esc(b.venueAddress) || "Not provided"}</td></tr>
+      <tr><td valign="top"><strong>Special requirements</strong></td><td>${esc(b.specialRequirements) || "None"}</td></tr>
+    </table>
+    <hr/>
+    <p style="color:#888;font-size:12px;">Sent from ${esc(b.source) || "ambertraining.co.uk"}. Reply to this email to reach the client directly.</p>
+  `;
+
+  // 1) Notify the Amber Training inbox.
+  try {
+    await transporter.sendMail({
+      from: `"Amber Training Bookings" <${process.env.AUTH_EMAIL}>`,
+      to: process.env.AUTH_EMAIL,
+      replyTo: b.email,
+      subject: `New ${esc(b.courseType)} booking request – ${esc(b.companyName)}`,
+      html,
+    });
+  } catch (error) {
+    throw new ApiError(500, `Error sending booking email: ${error}`);
+  }
+
+  // 2) Send the client an instant confirmation (best-effort; do not fail the
+  // request if this errors).
+  try {
+    await transporter.sendMail({
+      from: `"Amber Training" <${process.env.AUTH_EMAIL}>`,
+      to: b.email,
+      subject:
+        "We've received your first aid training request – Amber Training",
+      html: `
+        <p>Hi ${esc(b.contactName)},</p>
+        <p>Thank you for your ${esc(b.courseType)} booking request for ${esc(b.companyName)}. We have received your details and will be in touch within 24 hours with your confirmation and invoice. No payment is needed to secure your booking.</p>
+        <p>If anything is urgent, call us on +44 7763 658885 or reply to this email.</p>
+        <p>Kind regards,<br/>The Amber Training team</p>
+      `,
+    });
+  } catch (error) {
+    console.error("Client confirmation email failed (non-fatal):", error);
+  }
+
+  return true;
+};
+
 // Website enquiry / contact form -> lands in the Amber Training inbox.
 export interface EnquiryPayload {
   firstName: string;
