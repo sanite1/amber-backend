@@ -15,6 +15,7 @@ import adminRoutes from "./routes/admin.routes";
 import calendarRoutes from "./routes/calendar.routes";
 import bookCourseRoutes from "./routes/course.routes";
 import paymentRoutes from "./routes/payment.routes";
+import contactRoutes from "./routes/contact.routes";
 import "./cron/studentCron";
 import "./cron/tutorCron";
 
@@ -43,6 +44,7 @@ app.use("/api/messages", messageRoutes);
 app.use("/api/calendar", calendarRoutes);
 app.use("/api/courses", bookCourseRoutes);
 app.use("/api/payment", paymentRoutes);
+app.use("/api/contact", contactRoutes);
 
 app.listen(PORT, () => {
   console.log("Server Listening on port 4000...");
