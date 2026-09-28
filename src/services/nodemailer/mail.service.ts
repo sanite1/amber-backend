@@ -179,6 +179,19 @@ export const sendBookingApprovalEmail = async (email: string, data: any) => {
 };
 
 // B2B on-site training booking / quote request -> lands in the inbox.
+export interface BookingAttribution {
+  channel?: string;
+  landingPage?: string;
+  referrer?: string;
+  utmSource?: string;
+  utmMedium?: string;
+  utmCampaign?: string;
+  utmTerm?: string;
+  utmContent?: string;
+  gclid?: string;
+  firstSeen?: string;
+}
+
 export interface BookingEnquiryPayload {
   companyName: string;
   contactName: string;
@@ -190,6 +203,7 @@ export interface BookingEnquiryPayload {
   venueAddress?: string;
   specialRequirements?: string;
   source?: string;
+  attribution?: BookingAttribution;
 }
 
 const esc = (v: unknown) =>
@@ -286,6 +300,46 @@ const emailShell = (opts: {
 const btn = (href: string, label: string) =>
   `<a href="${href}" style="display:inline-block;background:${BRAND.primary};color:#ffffff;text-decoration:none;font-weight:700;font-family:${HEAD_FONT};padding:13px 24px;border-radius:8px;font-size:15px;">${esc(label)}</a>`;
 
+// "How they found us": first-touch attribution captured on the website and
+// shown with every enquiry so ads and organic bookings are told apart at a
+// glance. Only the fields that exist are rendered; older or no-JS enquiries
+// show an honest "not captured" line instead.
+const attributionBlock = (a?: BookingAttribution) => {
+  const rows: string[] = [];
+  if (a?.channel)
+    rows.push(detailRow("Channel", `<strong>${esc(a.channel)}</strong>`));
+  if (a?.utmCampaign) rows.push(detailRow("Campaign", esc(a.utmCampaign)));
+  if (a?.utmSource || a?.utmMedium)
+    rows.push(
+      detailRow(
+        "Source / medium",
+        esc([a?.utmSource, a?.utmMedium].filter(Boolean).join(" / ")),
+      ),
+    );
+  if (a?.gclid) rows.push(detailRow("Google Ads click ID", "Present"));
+  if (a?.landingPage)
+    rows.push(detailRow("First landed on", esc(a.landingPage)));
+  if (a?.referrer) rows.push(detailRow("Referrer", esc(a.referrer)));
+  if (a?.firstSeen) {
+    const d = new Date(a.firstSeen);
+    if (!Number.isNaN(d.getTime()))
+      rows.push(
+        detailRow(
+          "First visit",
+          d.toLocaleString("en-GB", { timeZone: "Europe/London" }),
+        ),
+      );
+  }
+  const inner = rows.length
+    ? rows.join("")
+    : detailRow("Channel", "Not captured (JavaScript off or storage blocked)");
+  return `
+      <p style="margin:0 0 8px;font-family:${HEAD_FONT};font-size:13px;font-weight:700;color:${BRAND.secondary};text-transform:uppercase;letter-spacing:0.06em;">How they found us</p>
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #efe9e1;border-radius:8px;overflow:hidden;margin:0 0 22px;">
+        ${inner}
+      </table>`;
+};
+
 export const sendBookingEnquiryMail = async (b: BookingEnquiryPayload) => {
   const replyHref = `mailto:${b.email}?subject=${encodeURIComponent(
     `Your ${courseInfo(b.courseType).name} booking with Amber Training`,
@@ -306,6 +360,7 @@ export const sendBookingEnquiryMail = async (b: BookingEnquiryPayload) => {
         ${detailRow("Venue address", esc(b.venueAddress) || "Not provided")}
         ${detailRow("Special requirements", esc(b.specialRequirements) || "None")}
       </table>
+      ${attributionBlock(b.attribution)}
       <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:${BRAND.cream};border-radius:8px;margin:0 0 8px;">
         <tr><td style="padding:18px 20px;font-family:${HEAD_FONT};color:${BRAND.secondary};font-size:14px;line-height:1.6;">
           <strong>Action needed:</strong> reply to the client within 24 hours with their confirmation and invoice. No payment is taken at booking.

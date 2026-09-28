@@ -5,6 +5,7 @@ import {
   sendEnquiryMail,
   sendBookingEnquiryMail,
 } from "../services/nodemailer/mail.service";
+import BookingEnquiryLog from "../models/BookingEnquiryLog";
 
 // Handle a B2B on-site training booking / quote request.
 export const createBookingEnquiryController = async (
@@ -24,7 +25,29 @@ export const createBookingEnquiryController = async (
       venueAddress,
       specialRequirements,
       source,
+      attribution,
     } = req.body;
+
+    // First-touch attribution captured by the frontend (ads / organic /
+    // referral / direct). Optional, and sanitised to known string fields with
+    // a length cap so nothing unexpected reaches the email or the log.
+    const str = (v: unknown) =>
+      typeof v === "string" && v.trim() ? v.slice(0, 500) : undefined;
+    const safeAttribution =
+      attribution && typeof attribution === "object"
+        ? {
+            channel: str((attribution as any).channel),
+            landingPage: str((attribution as any).landingPage),
+            referrer: str((attribution as any).referrer),
+            utmSource: str((attribution as any).utmSource),
+            utmMedium: str((attribution as any).utmMedium),
+            utmCampaign: str((attribution as any).utmCampaign),
+            utmTerm: str((attribution as any).utmTerm),
+            utmContent: str((attribution as any).utmContent),
+            gclid: str((attribution as any).gclid),
+            firstSeen: str((attribution as any).firstSeen),
+          }
+        : undefined;
 
     if (!companyName || !contactName || !email || !courseType) {
       return next(
@@ -51,7 +74,31 @@ export const createBookingEnquiryController = async (
       venueAddress,
       specialRequirements,
       source,
+      attribution: safeAttribution,
     });
+
+    // Durable, scannable record of the enquiry and where it came from.
+    // Best-effort: a logging failure must never fail a real enquiry.
+    try {
+      await BookingEnquiryLog.create({
+        companyName,
+        contactName,
+        email,
+        phone,
+        courseType,
+        delegates: delegates != null ? String(delegates) : undefined,
+        preferredDates,
+        venueAddress,
+        specialRequirements,
+        source,
+        attribution: safeAttribution,
+      });
+    } catch (logError) {
+      console.error(
+        "booking enquiry log write failed:",
+        logError instanceof Error ? logError.message : logError,
+      );
+    }
 
     return res
       .status(200)
