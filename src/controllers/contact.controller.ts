@@ -121,6 +121,27 @@ export const createBookingEnquiryController = async (
   }
 };
 
+// First-touch attribution sent by the contact form, sanitised the same way as
+// the booking handler above: known string fields only, length capped.
+const sanitiseAttribution = (attribution: unknown) => {
+  if (!attribution || typeof attribution !== "object") return undefined;
+  const a = attribution as Record<string, unknown>;
+  const str = (v: unknown) =>
+    typeof v === "string" && v.trim() ? v.slice(0, 500) : undefined;
+  return {
+    channel: str(a.channel),
+    landingPage: str(a.landingPage),
+    referrer: str(a.referrer),
+    utmSource: str(a.utmSource),
+    utmMedium: str(a.utmMedium),
+    utmCampaign: str(a.utmCampaign),
+    utmTerm: str(a.utmTerm),
+    utmContent: str(a.utmContent),
+    gclid: str(a.gclid),
+    firstSeen: str(a.firstSeen),
+  };
+};
+
 // Handle a website enquiry / contact form submission.
 export const createEnquiryController = async (
   req: Request,
@@ -136,7 +157,9 @@ export const createEnquiryController = async (
       message,
       courseInterest,
       source,
+      attribution,
     } = req.body;
+    const safeAttribution = sanitiseAttribution(attribution);
 
     if (!firstName || !email || !message) {
       return next(
@@ -157,7 +180,28 @@ export const createEnquiryController = async (
       message,
       courseInterest,
       source,
+      attribution: safeAttribution,
     });
+
+    // Same durable log as bookings, marked kind "contact", so every enquiry
+    // and where it came from can be scanned in one place. Best-effort.
+    try {
+      await BookingEnquiryLog.create({
+        kind: "contact",
+        contactName: `${firstName} ${lastName || ""}`.trim(),
+        email,
+        phone,
+        courseInterest,
+        message,
+        source,
+        attribution: safeAttribution,
+      });
+    } catch (logError) {
+      console.error(
+        "contact enquiry log write failed:",
+        logError instanceof Error ? logError.message : logError,
+      );
+    }
 
     return res
       .status(200)
