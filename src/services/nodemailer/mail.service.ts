@@ -426,20 +426,24 @@ export interface EnquiryPayload {
   message: string;
   courseInterest?: string;
   source?: string;
+  attribution?: BookingAttribution;
 }
 
 export const sendEnquiryMail = async (enquiry: EnquiryPayload) => {
   const fullName = `${enquiry.firstName} ${enquiry.lastName || ""}`.trim();
+  // Visitor-typed values are escaped so nothing they enter renders as HTML
+  // (links, images) in the inbox.
   const html = `
     <h2>New website enquiry</h2>
-    <p><strong>Name:</strong> ${fullName}</p>
-    <p><strong>Email:</strong> ${enquiry.email}</p>
-    <p><strong>Phone:</strong> ${enquiry.phone || "Not provided"}</p>
-    <p><strong>Course interest:</strong> ${enquiry.courseInterest || "Not specified"}</p>
+    <p><strong>Name:</strong> ${esc(fullName)}</p>
+    <p><strong>Email:</strong> ${esc(enquiry.email)}</p>
+    <p><strong>Phone:</strong> ${esc(enquiry.phone || "Not provided")}</p>
+    <p><strong>Course interest:</strong> ${esc(enquiry.courseInterest || "Not specified")}</p>
     <p><strong>Message:</strong></p>
-    <p>${(enquiry.message || "").replace(/\n/g, "<br/>")}</p>
+    <p>${esc(enquiry.message || "").replace(/\n/g, "<br/>")}</p>
+    ${attributionBlock(enquiry.attribution)}
     <hr/>
-    <p style="color:#888;font-size:12px;">Sent from ${enquiry.source || "ambertraining.co.uk"}</p>
+    <p style="color:#888;font-size:12px;">Sent from ${esc(enquiry.source || "ambertraining.co.uk")}</p>
   `;
 
   const mailOptions = {

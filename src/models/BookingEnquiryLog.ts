@@ -6,8 +6,13 @@ import { Schema, model } from "mongoose";
 // answers "who enquired", this collection answers "and where they came from"
 // in a form that can be queried and aggregated later. Written best-effort:
 // a logging failure never blocks or fails the enquiry itself.
+// Contact form enquiries are logged here too with kind "contact"; booking
+// records have no kind (or "booking").
 const BookingEnquiryLogSchema = new Schema(
   {
+    kind: { type: String },
+    courseInterest: { type: String },
+    message: { type: String },
     companyName: { type: String },
     contactName: { type: String },
     email: { type: String },
