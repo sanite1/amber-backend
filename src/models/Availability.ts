@@ -41,7 +41,7 @@ const tutorAvailabilitySchema = new Schema(
   {
     timestamps: true,
     toJSON: {
-      transform(doc, ret) {
+      transform(doc, ret: any) {
         delete ret.__v;
       },
     },

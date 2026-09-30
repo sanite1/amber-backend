@@ -14,11 +14,18 @@ const PORT = 4000;
 const app = express();
 app.disable("x-powered-by");
 
-app.use(express.json());
+app.use(express.json({ limit: "50kb" }));
 
+// Browsers may only call this API from the Amber Training website (and its
+// Vercel previews and local development). Server-to-server calls, such as the
+// website's no-JavaScript booking path, send no Origin and are unaffected.
+const ALLOWED_ORIGINS = [
+  /^https:\/\/(www\.)?ambertraining\.co\.uk$/,
+  /^https:\/\/amber-mvp[a-z0-9-]*\.vercel\.app$/,
+  /^http:\/\/localhost:\d+$/,
+];
 const corsOption = {
-  origin: "*",
-  credentials: true,
+  origin: ALLOWED_ORIGINS,
 };
 app.use(cors(corsOption));
 

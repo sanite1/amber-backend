@@ -12,10 +12,8 @@ const transporter = createTransport({
     user: process.env.AUTH_EMAIL, // Your full email address
     pass: process.env.AUTH_PASS, // Email password from environment variable
   },
-  tls: {
-    // Do not fail on invalid certs
-    rejectUnauthorized: false,
-  },
+  // Certificates are verified (Node's default). mail.privateemail.com presents
+  // a valid Sectigo certificate, checked 30 Sep 2026.
 });
 
 // Configure Handlebars for email templates

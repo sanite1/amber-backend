@@ -25,7 +25,9 @@ frontend: EFAW £550/session, FAW £1,500/session, up to 12 delegates, on-site.
   `sendBookingEnquiryMail`, `sendEnquiryMail`, plus a shared branded
   HTML email shell (`emailShell`, `courseCard`, `detailRow`, `btn`).
 - The pre-existing routes (users, courses, payment, admin, etc.) are legacy from
-  the original tutoring-marketplace template and are not part of the B2B flow.
+  the original tutoring-marketplace template. Since 30 Sep 2026 they are NOT
+  mounted (security): only `/api/contact` and `/api/booking-availability` are
+  served. Do not re-mount them.
 
 ## Email design (brand)
 - HTML email shell: hosted Amber logo header
@@ -50,7 +52,15 @@ frontend: EFAW £550/session, FAW £1,500/session, up to 12 delegates, on-site.
   routes only.
 - **Hosted Cloudinary logo** in emails: email clients need an absolute image URL;
   the logo was already hosted there by the original template.
-- **CORS is open (`origin: "*"`)** so the frontend (different origin) can POST.
+- **CORS allows only the website origins** (ambertraining.co.uk with or
+  without www, amber-mvp Vercel previews, localhost). Server-to-server calls
+  (the website's no-JS booking server action) send no Origin and are unaffected.
+- **Spam protection lives here** (`src/services/spamGuard.ts`): honeypot
+  (`website`) and fill time (`fillMs` under 3 s) drop silently; links, sales
+  pitch wording or an unusual phone number deliver to the inbox marked
+  "[Possible spam]" with no client confirmation; per IP and per email hourly
+  limits via the `RateLimitHit` TTL collection (fails open). Never reject a
+  real enquiry on a soft signal.
 
 ## Deploy / Git
 - **Production branch = `develop`** → auto-deploys. This Vercel project does NOT

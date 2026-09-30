@@ -204,13 +204,17 @@ export interface BookingEnquiryPayload {
   specialRequirements?: string;
   source?: string;
   attribution?: BookingAttribution;
+  /** Reasons the submission looks like spam; empty or absent when clean. */
+  spamFlags?: string[];
 }
 
 const esc = (v: unknown) =>
   String(v ?? "")
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;");
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
 
 // --- Branded email building blocks (Amber Training brand guide) ---------------
 const AMBER_LOGO =
@@ -298,7 +302,16 @@ const emailShell = (opts: {
 </body></html>`;
 
 const btn = (href: string, label: string) =>
-  `<a href="${href}" style="display:inline-block;background:${BRAND.primary};color:#ffffff;text-decoration:none;font-weight:700;font-family:${HEAD_FONT};padding:13px 24px;border-radius:8px;font-size:15px;">${esc(label)}</a>`;
+  `<a href="${esc(href)}" style="display:inline-block;background:${BRAND.primary};color:#ffffff;text-decoration:none;font-weight:700;font-family:${HEAD_FONT};padding:13px 24px;border-radius:8px;font-size:15px;">${esc(label)}</a>`;
+
+// Shown at the top of an inbox email when the submission looks like spam, so
+// it can be skimmed and deleted. Flagged senders get no confirmation email.
+const spamBanner = (flags?: string[]) =>
+  flags && flags.length
+    ? `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#fdecea;border:1px solid #f5c2c0;border-radius:8px;margin:0 0 20px;"><tr><td style="padding:14px 18px;font-family:${HEAD_FONT};color:#8a1f17;font-size:14px;line-height:1.5;"><strong>Possible spam:</strong> ${esc(flags.join(", "))}. No confirmation was sent to the sender.</td></tr></table>`
+    : "";
+const spamPrefix = (flags?: string[]) =>
+  flags && flags.length ? "[Possible spam] " : "";
 
 // "How they found us": first-touch attribution captured on the website and
 // shown with every enquiry so ads and organic bookings are told apart at a
@@ -341,6 +354,7 @@ const attributionBlock = (a?: BookingAttribution) => {
 };
 
 export const sendBookingEnquiryMail = async (b: BookingEnquiryPayload) => {
+  const flagged = Boolean(b.spamFlags && b.spamFlags.length);
   const replyHref = `mailto:${b.email}?subject=${encodeURIComponent(
     `Your ${courseInfo(b.courseType).name} booking with Amber Training`,
   )}`;
@@ -348,6 +362,7 @@ export const sendBookingEnquiryMail = async (b: BookingEnquiryPayload) => {
     title: "New on-site first aid training booking request",
     preheader: `${b.companyName} requested ${b.courseType} training`,
     contentHtml: `
+      ${spamBanner(b.spamFlags)}
       <p style="margin:0 0 20px;">A new booking enquiry has just come in through ambertraining.co.uk. The details are below.</p>
       ${courseCard(b.courseType)}
       <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #efe9e1;border-radius:8px;overflow:hidden;margin:0 0 22px;">
@@ -377,15 +392,22 @@ export const sendBookingEnquiryMail = async (b: BookingEnquiryPayload) => {
       from: `"Amber Training Bookings" <${process.env.AUTH_EMAIL}>`,
       to: process.env.AUTH_EMAIL,
       replyTo: b.email,
-      subject: `New ${esc(b.courseType)} booking request – ${esc(b.companyName)}`,
+      // Plain text, so no HTML escaping (nodemailer strips line breaks).
+      subject: `${spamPrefix(b.spamFlags)}New ${b.courseType} booking request – ${b.companyName}`,
       html,
     });
   } catch (error) {
-    throw new ApiError(500, `Error sending booking email: ${error}`);
+    console.error("Booking notification email failed:", error);
+    throw new ApiError(
+      500,
+      "Sorry, we could not send your request. Please email support@ambertraining.co.uk or call +44 7763 658885.",
+    );
   }
 
   // 2) Send the client an instant confirmation (best-effort; do not fail the
-  // request if this errors).
+  // request if this errors). Never for a submission flagged as possible spam,
+  // so bots cannot use this to send mail to third parties.
+  if (flagged) return true;
   try {
     await transporter.sendMail({
       from: `"Amber Training" <${process.env.AUTH_EMAIL}>`,
@@ -427,6 +449,7 @@ export interface EnquiryPayload {
   courseInterest?: string;
   source?: string;
   attribution?: BookingAttribution;
+  spamFlags?: string[];
 }
 
 export const sendEnquiryMail = async (enquiry: EnquiryPayload) => {
@@ -434,6 +457,7 @@ export const sendEnquiryMail = async (enquiry: EnquiryPayload) => {
   // Visitor-typed values are escaped so nothing they enter renders as HTML
   // (links, images) in the inbox.
   const html = `
+    ${spamBanner(enquiry.spamFlags)}
     <h2>New website enquiry</h2>
     <p><strong>Name:</strong> ${esc(fullName)}</p>
     <p><strong>Email:</strong> ${esc(enquiry.email)}</p>
@@ -450,7 +474,7 @@ export const sendEnquiryMail = async (enquiry: EnquiryPayload) => {
     from: `"Amber Training Website" <${process.env.AUTH_EMAIL}>`,
     to: process.env.AUTH_EMAIL,
     replyTo: enquiry.email,
-    subject: `New enquiry from ${fullName}${
+    subject: `${spamPrefix(enquiry.spamFlags)}New enquiry from ${fullName}${
       enquiry.courseInterest ? ` – ${enquiry.courseInterest}` : ""
     }`,
     html,
@@ -459,7 +483,11 @@ export const sendEnquiryMail = async (enquiry: EnquiryPayload) => {
   try {
     await transporter.sendMail(mailOptions);
   } catch (error) {
-    throw new ApiError(500, `Error sending enquiry email: ${error}`);
+    console.error("Enquiry notification email failed:", error);
+    throw new ApiError(
+      500,
+      "Sorry, we could not send your enquiry. Please email support@ambertraining.co.uk or call +44 7763 658885.",
+    );
   }
 
   return true;

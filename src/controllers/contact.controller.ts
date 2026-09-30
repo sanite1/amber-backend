@@ -6,6 +6,18 @@ import {
   sendBookingEnquiryMail,
 } from "../services/nodemailer/mail.service";
 import BookingEnquiryLog from "../models/BookingEnquiryLog";
+import {
+  assessSubmission,
+  checkRateLimit,
+  clip,
+  isValidEmail,
+} from "../services/spamGuard";
+
+const SUCCESS_BOOKING =
+  "Thank you. We will be in touch within 24 hours with your confirmation and invoice.";
+const SUCCESS_ENQUIRY =
+  "Thank you for your enquiry. We will be in touch shortly.";
+const COURSES = ["EFAW", "FAW", "PFA"];
 
 // Handle a B2B on-site training booking / quote request.
 export const createBookingEnquiryController = async (
@@ -14,19 +26,20 @@ export const createBookingEnquiryController = async (
   next: NextFunction,
 ) => {
   try {
-    const {
-      companyName,
-      contactName,
-      email,
-      phone,
-      courseType,
-      delegates,
-      preferredDates,
-      venueAddress,
-      specialRequirements,
-      source,
-      attribution,
-    } = req.body;
+    const body = req.body || {};
+    const { attribution } = body;
+    // Every free-text field is trimmed and length capped (never rejected for
+    // length, so a long genuine message is not lost).
+    const companyName = clip(body.companyName, 150);
+    const contactName = clip(body.contactName, 100);
+    const email = clip(body.email, 254);
+    const phone = clip(body.phone, 30);
+    const courseType = clip(body.courseType, 10)?.toUpperCase();
+    const delegates = clip(body.delegates, 30);
+    const preferredDates = clip(body.preferredDates, 300);
+    const venueAddress = clip(body.venueAddress, 300);
+    const specialRequirements = clip(body.specialRequirements, 3000);
+    const source = clip(body.source, 100);
 
     // First-touch attribution captured by the frontend (ads / organic /
     // referral / direct). Optional, and sanitised to known string fields with
@@ -58,10 +71,29 @@ export const createBookingEnquiryController = async (
       );
     }
 
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
+    if (!isValidEmail(email)) {
       return next(new ApiError(400, "Please provide a valid email address."));
     }
+    if (!COURSES.includes(courseType)) {
+      return next(new ApiError(400, "Please choose a course."));
+    }
+
+    const verdict = assessSubmission({
+      honeypot: body.website,
+      fillMs: body.fillMs,
+      names: [companyName, contactName],
+      texts: [specialRequirements, venueAddress, preferredDates],
+      phone,
+    });
+    if (verdict.action === "drop") {
+      // Look successful so the bot learns nothing; send and store nothing.
+      console.warn(`booking dropped as spam (${verdict.reason})`);
+      return res.status(200).json(new ApiResponse(200, SUCCESS_BOOKING));
+    }
+    const spamFlags = verdict.flags;
+
+    const limited = await checkRateLimit(req, "booking", email);
+    if (limited) return next(new ApiError(429, limited));
 
     await sendBookingEnquiryMail({
       companyName,
@@ -75,6 +107,7 @@ export const createBookingEnquiryController = async (
       specialRequirements,
       source,
       attribution: safeAttribution,
+      spamFlags,
     });
 
     // Durable, scannable record of the enquiry and where it came from.
@@ -86,12 +119,16 @@ export const createBookingEnquiryController = async (
         email,
         phone,
         courseType,
-        delegates: delegates != null ? String(delegates) : undefined,
+        delegates,
         preferredDates,
         venueAddress,
         specialRequirements,
         source,
         attribution: safeAttribution,
+        spamFlags,
+        fillMs: Number.isFinite(Number(body.fillMs))
+          ? Number(body.fillMs)
+          : undefined,
       });
     } catch (logError) {
       console.error(
@@ -100,14 +137,7 @@ export const createBookingEnquiryController = async (
       );
     }
 
-    return res
-      .status(200)
-      .json(
-        new ApiResponse(
-          200,
-          "Thank you. We will be in touch within 24 hours with your confirmation and invoice.",
-        ),
-      );
+    return res.status(200).json(new ApiResponse(200, SUCCESS_BOOKING));
   } catch (error) {
     if (error instanceof ApiError) {
       return res
@@ -149,17 +179,15 @@ export const createEnquiryController = async (
   next: NextFunction,
 ) => {
   try {
-    const {
-      firstName,
-      lastName,
-      email,
-      phone,
-      message,
-      courseInterest,
-      source,
-      attribution,
-    } = req.body;
-    const safeAttribution = sanitiseAttribution(attribution);
+    const body = req.body || {};
+    const firstName = clip(body.firstName, 100);
+    const lastName = clip(body.lastName, 100);
+    const email = clip(body.email, 254);
+    const phone = clip(body.phone, 30);
+    const message = clip(body.message, 5000);
+    const courseInterest = clip(body.courseInterest, 100);
+    const source = clip(body.source, 100);
+    const safeAttribution = sanitiseAttribution(body.attribution);
 
     if (!firstName || !email || !message) {
       return next(
@@ -167,10 +195,25 @@ export const createEnquiryController = async (
       );
     }
 
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
+    if (!isValidEmail(email)) {
       return next(new ApiError(400, "Please provide a valid email address."));
     }
+
+    const verdict = assessSubmission({
+      honeypot: body.website,
+      fillMs: body.fillMs,
+      names: [firstName, lastName],
+      texts: [message],
+      phone,
+    });
+    if (verdict.action === "drop") {
+      console.warn(`enquiry dropped as spam (${verdict.reason})`);
+      return res.status(200).json(new ApiResponse(200, SUCCESS_ENQUIRY));
+    }
+    const spamFlags = verdict.flags;
+
+    const limited = await checkRateLimit(req, "contact", email);
+    if (limited) return next(new ApiError(429, limited));
 
     await sendEnquiryMail({
       firstName,
@@ -181,6 +224,7 @@ export const createEnquiryController = async (
       courseInterest,
       source,
       attribution: safeAttribution,
+      spamFlags,
     });
 
     // Same durable log as bookings, marked kind "contact", so every enquiry
@@ -195,6 +239,10 @@ export const createEnquiryController = async (
         message,
         source,
         attribution: safeAttribution,
+        spamFlags,
+        fillMs: Number.isFinite(Number(body.fillMs))
+          ? Number(body.fillMs)
+          : undefined,
       });
     } catch (logError) {
       console.error(
@@ -203,14 +251,7 @@ export const createEnquiryController = async (
       );
     }
 
-    return res
-      .status(200)
-      .json(
-        new ApiResponse(
-          200,
-          "Thank you for your enquiry. We will be in touch shortly.",
-        ),
-      );
+    return res.status(200).json(new ApiResponse(200, SUCCESS_ENQUIRY));
   } catch (error) {
     if (error instanceof ApiError) {
       return res
