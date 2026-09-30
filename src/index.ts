@@ -5,25 +5,14 @@ import cors from "cors";
 import { connectDb } from "./config/db";
 import { globalErrorHandler } from "./middlewares/globalErrorHandler";
 import ApiError from "./errors/apiError";
-import userRoutes from "./routes/user.routes";
-import reviewRoutes from "./routes/reviews.routes";
-import notificationRoutes from "./routes/notification.routes";
-import availabilityRoutes from "./routes/availability.routes";
-import lessonRoutes from "./routes/lesson.routes";
-import messageRoutes from "./routes/message.routes";
-import adminRoutes from "./routes/admin.routes";
-import calendarRoutes from "./routes/calendar.routes";
-import bookCourseRoutes from "./routes/course.routes";
-import paymentRoutes from "./routes/payment.routes";
 import contactRoutes from "./routes/contact.routes";
 import bookingAvailabilityRoutes from "./routes/bookingAvailability.routes";
-import "./cron/studentCron";
-import "./cron/tutorCron";
 import "./cron/bookingAvailabilityCron";
 
 const PORT = 4000;
 
 const app = express();
+app.disable("x-powered-by");
 
 app.use(express.json());
 
@@ -36,16 +25,9 @@ app.use(cors(corsOption));
 connectDb();
 
 //Routes
-app.use("/api/users", userRoutes);
-app.use("/api/reviews", reviewRoutes);
-app.use("/api/notifications", notificationRoutes);
-app.use("/api/availability", availabilityRoutes);
-app.use("/api/lessons", lessonRoutes);
-app.use("/api/admin", adminRoutes);
-app.use("/api/messages", messageRoutes);
-app.use("/api/calendar", calendarRoutes);
-app.use("/api/courses", bookCourseRoutes);
-app.use("/api/payment", paymentRoutes);
+// Only the live website routes are mounted. The retired tutoring platform's
+// routes (users, admin, courses, payment, lessons, etc.) stay in the repo but
+// are not served.
 app.use("/api/contact", contactRoutes);
 app.use("/api/booking-availability", bookingAvailabilityRoutes);
 
