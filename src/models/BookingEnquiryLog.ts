@@ -23,6 +23,10 @@ const BookingEnquiryLogSchema = new Schema(
     venueAddress: { type: String },
     specialRequirements: { type: String },
     source: { type: String },
+    // Reasons the submission looked like spam (empty when clean), and how
+    // long the visitor took to fill the form, when the website sent it.
+    spamFlags: { type: [String], default: undefined },
+    fillMs: { type: Number },
     attribution: {
       channel: { type: String },
       landingPage: { type: String },

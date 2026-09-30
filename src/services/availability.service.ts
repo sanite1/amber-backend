@@ -165,8 +165,10 @@ export const updateTutorAvailabilityService = async (
   }
 
   // Update tutor availability in the database
-  existingAvailability.weeklyAvailability = mergedAvailability;
-  existingAvailability.timesForBooking = timesForBooking;
+  // Mongoose 8.24 types document arrays strictly; the plain values are what
+  // Mongoose casts on save, as before.
+  existingAvailability.weeklyAvailability = mergedAvailability as any;
+  existingAvailability.timesForBooking = timesForBooking as any;
   if (timezone) existingAvailability.timezone = timezone; // Update timezone if provided
 
   await existingAvailability.save();

@@ -11,7 +11,7 @@ const reviewSchema = new Schema<IReview>(
   {
     timestamps: true,
     toJSON: {
-      transform(doc, ret) {
+      transform(doc, ret: any) {
         delete ret.__v;
       },
     },
