@@ -197,7 +197,7 @@ export interface BookingEnquiryPayload {
   contactName: string;
   email: string;
   phone?: string;
-  courseType: string; // EFAW | FAW
+  courseType: string; // EFAW | FAW | PFA
   delegates?: string | number;
   preferredDates?: string;
   venueAddress?: string;
@@ -230,20 +230,45 @@ const BRAND = {
 const HEAD_FONT = "'Raleway','Helvetica Neue',Arial,sans-serif";
 const BODY_FONT = "'Lora',Georgia,'Times New Roman',serif";
 
+// Client-facing course details. Course names are always written in full (no
+// acronyms) and prices match the website: per session, all-inclusive.
 const courseInfo = (type: string) => {
-  const t = (type || "").toUpperCase();
-  if (t.includes("FAW") && !t.includes("EFAW")) {
+  const t = (type || "").toUpperCase().trim();
+  if (t === "PFA") {
     return {
-      name: "First Aid at Work (FAW)",
-      price: "£1,500 per session",
+      name: "Paediatric First Aid",
+      price: "£995 per session, all-inclusive",
+      meta: "2 days (12 hours) · up to 12 delegates · on-site",
+    };
+  }
+  if (t === "FAW") {
+    return {
+      name: "First Aid at Work",
+      price: "£1,500 per session, all-inclusive",
       meta: "3 days · up to 12 delegates · on-site",
     };
   }
   return {
-    name: "Emergency First Aid at Work (EFAW)",
-    price: "£550 per session (was £750)",
+    name: "Emergency First Aid at Work",
+    price: "£550 per session, all-inclusive",
     meta: "1 day · up to 12 delegates · on-site",
   };
+};
+
+// The booking form's date picker sends ISO dates (2026-11-12); show them the
+// British way (12 November 2026). Anything else is shown as typed.
+const ukDate = (v?: string) => {
+  const s = (v || "").trim();
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
+  const d = new Date(`${s}T00:00:00Z`);
+  return Number.isNaN(d.getTime())
+    ? s
+    : d.toLocaleDateString("en-GB", {
+        day: "numeric",
+        month: "long",
+        year: "numeric",
+        timeZone: "UTC",
+      });
 };
 
 // A clean label/value row for the details table.
@@ -294,7 +319,7 @@ const emailShell = (opts: {
     On-site first aid training for London businesses<br/>
     <span style="color:${BRAND.primary};">&bull;</span> +44 7763 658885 &nbsp;&nbsp;
     <span style="color:${BRAND.primary};">&bull;</span> <a href="mailto:support@ambertraining.co.uk" style="color:#ffffff;text-decoration:underline;">support@ambertraining.co.uk</a><br/>
-    <span style="color:rgba(255,255,255,0.75);">Based in North London, delivering across London and surrounding areas</span>
+    <span style="color:rgba(255,255,255,0.75);">Based in North London, delivering across London, the surrounding counties and throughout England</span>
   </td></tr>
 </table>
 </td></tr>
@@ -360,7 +385,7 @@ export const sendBookingEnquiryMail = async (b: BookingEnquiryPayload) => {
   )}`;
   const html = emailShell({
     title: "New on-site first aid training booking request",
-    preheader: `${b.companyName} requested ${b.courseType} training`,
+    preheader: `${b.companyName} requested ${courseInfo(b.courseType).name} training`,
     contentHtml: `
       ${spamBanner(b.spamFlags)}
       <p style="margin:0 0 20px;">A new booking enquiry has just come in through ambertraining.co.uk. The details are below.</p>
@@ -371,7 +396,7 @@ export const sendBookingEnquiryMail = async (b: BookingEnquiryPayload) => {
         ${detailRow("Email", `<a href="mailto:${esc(b.email)}" style="color:${BRAND.primary};">${esc(b.email)}</a>`)}
         ${detailRow("Phone", esc(b.phone) || "Not provided")}
         ${detailRow("Number of delegates", esc(b.delegates) || "Not specified")}
-        ${detailRow("Preferred dates", esc(b.preferredDates) || "Flexible")}
+        ${detailRow("Preferred dates", esc(ukDate(b.preferredDates)) || "Flexible")}
         ${detailRow("Venue address", esc(b.venueAddress) || "Not provided")}
         ${detailRow("Special requirements", esc(b.specialRequirements) || "None")}
       </table>
@@ -393,7 +418,7 @@ export const sendBookingEnquiryMail = async (b: BookingEnquiryPayload) => {
       to: process.env.AUTH_EMAIL,
       replyTo: b.email,
       // Plain text, so no HTML escaping (nodemailer strips line breaks).
-      subject: `${spamPrefix(b.spamFlags)}New ${b.courseType} booking request – ${b.companyName}`,
+      subject: `${spamPrefix(b.spamFlags)}New ${courseInfo(b.courseType).name} booking request: ${b.companyName}`,
       html,
     });
   } catch (error) {
@@ -412,8 +437,7 @@ export const sendBookingEnquiryMail = async (b: BookingEnquiryPayload) => {
     await transporter.sendMail({
       from: `"Amber Training" <${process.env.AUTH_EMAIL}>`,
       to: b.email,
-      subject:
-        "We've received your first aid training request – Amber Training",
+      subject: "Amber Training: we've received your first aid training request",
       html: emailShell({
         title: "Thank you, we've received your request",
         preheader:
@@ -424,7 +448,7 @@ export const sendBookingEnquiryMail = async (b: BookingEnquiryPayload) => {
           ${courseCard(b.courseType)}
           <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #efe9e1;border-radius:8px;overflow:hidden;margin:0 0 22px;">
             ${detailRow("Number of delegates", esc(b.delegates) || "To be confirmed")}
-            ${detailRow("Preferred dates", esc(b.preferredDates) || "To be confirmed")}
+            ${detailRow("Preferred dates", esc(ukDate(b.preferredDates)) || "To be confirmed")}
             ${detailRow("Venue", esc(b.venueAddress) || "To be confirmed")}
           </table>
           <p style="margin:0 0 18px;">If anything is urgent, just call us on <strong>+44 7763 658885</strong> or reply to this email and we will be glad to help.</p>
@@ -475,7 +499,7 @@ export const sendEnquiryMail = async (enquiry: EnquiryPayload) => {
     to: process.env.AUTH_EMAIL,
     replyTo: enquiry.email,
     subject: `${spamPrefix(enquiry.spamFlags)}New enquiry from ${fullName}${
-      enquiry.courseInterest ? ` – ${enquiry.courseInterest}` : ""
+      enquiry.courseInterest ? `: ${enquiry.courseInterest}` : ""
     }`,
     html,
   };
