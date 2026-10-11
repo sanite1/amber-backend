@@ -316,10 +316,10 @@ const emailShell = (opts: {
   </td></tr>
   <tr><td style="background:${BRAND.secondary};padding:24px 32px;font-family:${HEAD_FONT};color:#ffffff;font-size:13px;line-height:1.7;">
     <strong style="color:#ffffff;font-size:15px;">Amber Training</strong><br/>
-    On-site first aid training for London businesses<br/>
+    On-site first aid training at your workplace<br/>
     <span style="color:${BRAND.primary};">&bull;</span> +44 7763 658885 &nbsp;&nbsp;
     <span style="color:${BRAND.primary};">&bull;</span> <a href="mailto:support@ambertraining.co.uk" style="color:#ffffff;text-decoration:underline;">support@ambertraining.co.uk</a><br/>
-    <span style="color:rgba(255,255,255,0.75);">Based in North London, delivering across London, the surrounding counties and throughout England</span>
+    <span style="color:rgba(255,255,255,0.75);">Based in London. We train teams anywhere in England.</span>
   </td></tr>
 </table>
 </td></tr>
