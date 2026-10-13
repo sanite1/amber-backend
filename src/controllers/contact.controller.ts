@@ -62,6 +62,8 @@ export const createBookingEnquiryController = async (
           }
         : undefined;
 
+    const journey = sanitiseJourney(body.journey);
+
     if (!companyName || !contactName || !email || !courseType) {
       return next(
         new ApiError(
@@ -107,6 +109,7 @@ export const createBookingEnquiryController = async (
       specialRequirements,
       source,
       attribution: safeAttribution,
+      journey,
       spamFlags,
     });
 
@@ -125,6 +128,7 @@ export const createBookingEnquiryController = async (
         specialRequirements,
         source,
         attribution: safeAttribution,
+        journey,
         spamFlags,
         fillMs: Number.isFinite(Number(body.fillMs))
           ? Number(body.fillMs)
@@ -172,6 +176,27 @@ const sanitiseAttribution = (attribution: unknown) => {
   };
 };
 
+// Pages the visitor viewed on the visit they enquired from, as sent by the
+// website: path and time only, well-formed entries only, capped in count and
+// length so nothing unexpected reaches the email or the log.
+const sanitiseJourney = (journey: unknown) => {
+  if (!Array.isArray(journey)) return undefined;
+  const pages = journey
+    .filter((p): p is { path: string; at: string } => {
+      const v = p as Record<string, unknown> | null;
+      return (
+        !!v &&
+        typeof v.path === "string" &&
+        v.path.startsWith("/") &&
+        typeof v.at === "string" &&
+        !Number.isNaN(Date.parse(v.at))
+      );
+    })
+    .slice(0, 40)
+    .map((p) => ({ path: p.path.slice(0, 200), at: p.at.slice(0, 40) }));
+  return pages.length ? pages : undefined;
+};
+
 // Handle a website enquiry / contact form submission.
 export const createEnquiryController = async (
   req: Request,
@@ -188,6 +213,7 @@ export const createEnquiryController = async (
     const courseInterest = clip(body.courseInterest, 100);
     const source = clip(body.source, 100);
     const safeAttribution = sanitiseAttribution(body.attribution);
+    const journey = sanitiseJourney(body.journey);
 
     if (!firstName || !email || !message) {
       return next(
@@ -224,6 +250,7 @@ export const createEnquiryController = async (
       courseInterest,
       source,
       attribution: safeAttribution,
+      journey,
       spamFlags,
     });
 
@@ -239,6 +266,7 @@ export const createEnquiryController = async (
         message,
         source,
         attribution: safeAttribution,
+        journey,
         spamFlags,
         fillMs: Number.isFinite(Number(body.fillMs))
           ? Number(body.fillMs)

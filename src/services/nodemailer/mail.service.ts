@@ -192,6 +192,12 @@ export interface BookingAttribution {
   firstSeen?: string;
 }
 
+// One page the visitor viewed on the visit they enquired from, in order.
+export interface PageView {
+  path: string;
+  at: string;
+}
+
 export interface BookingEnquiryPayload {
   companyName: string;
   contactName: string;
@@ -204,6 +210,8 @@ export interface BookingEnquiryPayload {
   specialRequirements?: string;
   source?: string;
   attribution?: BookingAttribution;
+  /** Pages viewed on the visit they booked from, in order. */
+  journey?: PageView[];
   /** Reasons the submission looks like spam; empty or absent when clean. */
   spamFlags?: string[];
 }
@@ -342,7 +350,23 @@ const spamPrefix = (flags?: string[]) =>
 // shown with every enquiry so ads and organic bookings are told apart at a
 // glance. Only the fields that exist are rendered; older or no-JS enquiries
 // show an honest "not captured" line instead.
-const attributionBlock = (a?: BookingAttribution) => {
+// "12:53 /emergency-first-aid-at-work-london" per page, UK time.
+const pagesViewed = (journey?: PageView[]) =>
+  (journey || [])
+    .map((p) => {
+      const d = new Date(p.at);
+      const time = Number.isNaN(d.getTime())
+        ? ""
+        : d.toLocaleTimeString("en-GB", {
+            timeZone: "Europe/London",
+            hour: "2-digit",
+            minute: "2-digit",
+          });
+      return `${time} ${esc(p.path === "/" ? "/ (homepage)" : p.path)}`.trim();
+    })
+    .join("<br/>");
+
+const attributionBlock = (a?: BookingAttribution, journey?: PageView[]) => {
   const rows: string[] = [];
   if (a?.channel)
     rows.push(detailRow("Channel", `<strong>${esc(a.channel)}</strong>`));
@@ -358,6 +382,8 @@ const attributionBlock = (a?: BookingAttribution) => {
   if (a?.landingPage)
     rows.push(detailRow("First landed on", esc(a.landingPage)));
   if (a?.referrer) rows.push(detailRow("Referrer", esc(a.referrer)));
+  if (journey?.length)
+    rows.push(detailRow("Pages viewed this visit", pagesViewed(journey)));
   if (a?.firstSeen) {
     const d = new Date(a.firstSeen);
     if (!Number.isNaN(d.getTime()))
@@ -400,7 +426,7 @@ export const sendBookingEnquiryMail = async (b: BookingEnquiryPayload) => {
         ${detailRow("Venue address", esc(b.venueAddress) || "Not provided")}
         ${detailRow("Special requirements", esc(b.specialRequirements) || "None")}
       </table>
-      ${attributionBlock(b.attribution)}
+      ${attributionBlock(b.attribution, b.journey)}
       <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:${BRAND.cream};border-radius:8px;margin:0 0 8px;">
         <tr><td style="padding:18px 20px;font-family:${HEAD_FONT};color:${BRAND.secondary};font-size:14px;line-height:1.6;">
           <strong>Action needed:</strong> reply to the client within 24 hours with their confirmation and invoice. No payment is taken at booking.
@@ -473,6 +499,7 @@ export interface EnquiryPayload {
   courseInterest?: string;
   source?: string;
   attribution?: BookingAttribution;
+  journey?: PageView[];
   spamFlags?: string[];
 }
 
@@ -489,7 +516,7 @@ export const sendEnquiryMail = async (enquiry: EnquiryPayload) => {
     <p><strong>Course interest:</strong> ${esc(enquiry.courseInterest || "Not specified")}</p>
     <p><strong>Message:</strong></p>
     <p>${esc(enquiry.message || "").replace(/\n/g, "<br/>")}</p>
-    ${attributionBlock(enquiry.attribution)}
+    ${attributionBlock(enquiry.attribution, enquiry.journey)}
     <hr/>
     <p style="color:#888;font-size:12px;">Sent from ${esc(enquiry.source || "ambertraining.co.uk")}</p>
   `;
