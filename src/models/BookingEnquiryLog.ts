@@ -39,6 +39,11 @@ const BookingEnquiryLogSchema = new Schema(
       gclid: { type: String },
       firstSeen: { type: String },
     },
+    // Pages viewed on the visit they enquired from, in order.
+    journey: {
+      type: [{ path: { type: String }, at: { type: String }, _id: false }],
+      default: undefined,
+    },
   },
   { timestamps: true },
 );
