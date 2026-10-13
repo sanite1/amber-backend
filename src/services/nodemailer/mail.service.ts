@@ -325,8 +325,8 @@ const emailShell = (opts: {
   <tr><td style="background:${BRAND.secondary};padding:24px 32px;font-family:${HEAD_FONT};color:#ffffff;font-size:13px;line-height:1.7;">
     <strong style="color:#ffffff;font-size:15px;">Amber Training</strong><br/>
     On-site first aid training at your workplace<br/>
-    <span style="color:${BRAND.primary};">&bull;</span> +44 7763 658885 &nbsp;&nbsp;
-    <span style="color:${BRAND.primary};">&bull;</span> <a href="mailto:support@ambertraining.co.uk" style="color:#ffffff;text-decoration:underline;">support@ambertraining.co.uk</a><br/>
+    <span style="color:${BRAND.primary};">&bull;</span> <a href="mailto:support@ambertraining.co.uk" style="color:#ffffff;text-decoration:underline;">support@ambertraining.co.uk</a> &nbsp;&nbsp;
+    <span style="color:${BRAND.primary};">&bull;</span> +44 7763 658885<br/>
     <span style="color:rgba(255,255,255,0.75);">Based in London. We train teams anywhere in England.</span>
   </td></tr>
 </table>
@@ -451,7 +451,7 @@ export const sendBookingEnquiryMail = async (b: BookingEnquiryPayload) => {
     console.error("Booking notification email failed:", error);
     throw new ApiError(
       500,
-      "Sorry, we could not send your request. Please email support@ambertraining.co.uk or call +44 7763 658885.",
+      "Sorry, we could not send your request. Please try again or email support@ambertraining.co.uk.",
     );
   }
 
@@ -477,7 +477,7 @@ export const sendBookingEnquiryMail = async (b: BookingEnquiryPayload) => {
             ${detailRow("Preferred dates", esc(ukDate(b.preferredDates)) || "To be confirmed")}
             ${detailRow("Venue", esc(b.venueAddress) || "To be confirmed")}
           </table>
-          <p style="margin:0 0 18px;">If anything is urgent, just call us on <strong>+44 7763 658885</strong> or reply to this email and we will be glad to help.</p>
+          <p style="margin:0 0 18px;">If anything is urgent, just reply to this email and we will be glad to help.</p>
           <p style="margin:0;">Kind regards,<br/><strong>The Amber Training team</strong></p>
         `,
       }),
@@ -537,7 +537,7 @@ export const sendEnquiryMail = async (enquiry: EnquiryPayload) => {
     console.error("Enquiry notification email failed:", error);
     throw new ApiError(
       500,
-      "Sorry, we could not send your enquiry. Please email support@ambertraining.co.uk or call +44 7763 658885.",
+      "Sorry, we could not send your enquiry. Please try again or email support@ambertraining.co.uk.",
     );
   }
 
