@@ -2,7 +2,7 @@
 
 Backend API for **ambertraining.co.uk** (a B2B on-site first aid training
 provider, London). Express + TypeScript + MongoDB (Mongoose), nodemailer for
-email, Stripe present but unused for the current B2B flow. Deployed on Vercel as
+email. Deployed on Vercel as
 a single serverless function (`src/index.ts`, see `vercel.json`). Production URL:
 `https://amber-backend-seven.vercel.app`. The frontend is a separate repo
 (`amber-mvp`) and calls this API at `/api`.
@@ -24,10 +24,10 @@ frontend: EFAW £550/session, FAW £1,500/session, up to 12 delegates, on-site.
 - Email building lives in `src/services/nodemailer/mail.service.ts`:
   `sendBookingEnquiryMail`, `sendEnquiryMail`, plus a shared branded
   HTML email shell (`emailShell`, `courseCard`, `detailRow`, `btn`).
-- The pre-existing routes (users, courses, payment, admin, etc.) are legacy from
-  the original tutoring-marketplace template. Since 30 Sep 2026 they are NOT
-  mounted (security): only `/api/contact`, `/api/booking-availability` and
-  `/api/metrics` are served. Do not re-mount them.
+- Only `/api/contact`, `/api/booking-availability` and `/api/metrics` exist.
+  The old tutoring-marketplace template code (users, courses, payment, admin,
+  sockets, uploads, handlebars emails) was unmounted on 30 Sep 2026 and deleted
+  with its packages on 26 Oct 2026 (security review); it is in git history only.
 - **`POST /api/metrics/booking-card`** (since 26 Oct 2026): the website's
   booking card sends `{event: "start"|"submit", from, course, people}` with
   `navigator.sendBeacon` (text/plain JSON). Every field is checked against an
@@ -50,7 +50,7 @@ frontend: EFAW £550/session, FAW £1,500/session, up to 12 delegates, on-site.
 - All user input is HTML-escaped (`esc`).
 
 ## Env (in `.env`, never committed)
-- `MONGODB_URI`, `JWT_SECRET`, Cloudinary vars, `STRIPE_SECRET_KEY`.
+- `MONGODB_URI`. (`JWT_SECRET`, Cloudinary and Stripe vars are no longer used.)
 - `AUTH_EMAIL=support@ambertraining.co.uk`, `AUTH_PASS` — the SMTP mailbox
   (Namecheap Private Email, `mail.privateemail.com:465`) used to send and the
   inbox that receives booking notifications.
@@ -60,8 +60,7 @@ frontend: EFAW £550/session, FAW £1,500/session, up to 12 delegates, on-site.
 
 ## Key technical decisions (why)
 - **Inline HTML emails, not handlebars templates:** self-contained, brand-styled,
-  no template-file dependency. Old `.handlebars` templates remain for legacy
-  routes only.
+  no template-file dependency.
 - **Hosted Cloudinary logo** in emails: email clients need an absolute image URL;
   the logo was already hosted there by the original template.
 - **CORS allows only the website origins** (ambertraining.co.uk with or

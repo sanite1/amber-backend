@@ -14,7 +14,7 @@ import {
 } from "../services/spamGuard";
 
 const SUCCESS_BOOKING =
-  "Thank you. We will be in touch within 24 hours with your confirmation and invoice.";
+  "Thank you. Your booking has been received. Your agreement and invoice will be sent by email within one working day.";
 const SUCCESS_ENQUIRY =
   "Thank you for your enquiry. We will be in touch shortly.";
 const COURSES = ["EFAW", "FAW", "FAW_REQUAL", "PFA"];
