@@ -136,14 +136,26 @@ export const allowBookingCardEvent = async (req: Request) => {
 };
 
 /**
- * Check the secret header for the summary. The key lives in the env var
- * METRICS_READ_KEY; with no key set, nobody can read the summary.
+ * SHA-256 of the summary key. Only the hash is committed: the key itself is
+ * kept privately by Amber (on Joey's Mac), because the Vercel environment is
+ * not editable by us. A hash cannot be turned back into the key.
+ */
+const METRICS_READ_KEY_SHA256 =
+  "93c30ceef670dcacbd76708a041e6eec1114a458a137386478e2cb5b8c5bee6e";
+
+/**
+ * Check the secret header for the summary. The env var METRICS_READ_KEY, when
+ * set, takes precedence; otherwise the key must match the committed hash.
  */
 export const hasMetricsKey = (provided: unknown) => {
-  const expected = process.env.METRICS_READ_KEY;
-  if (!expected || typeof provided !== "string" || !provided) return false;
+  if (typeof provided !== "string" || !provided) return false;
   const digest = (s: string) => createHash("sha256").update(s).digest();
-  return timingSafeEqual(digest(provided), digest(expected));
+  const fromEnv = process.env.METRICS_READ_KEY;
+  if (fromEnv) return timingSafeEqual(digest(provided), digest(fromEnv));
+  return timingSafeEqual(
+    digest(provided),
+    Buffer.from(METRICS_READ_KEY_SHA256, "hex"),
+  );
 };
 
 type Pair = { start: number; submit: number };

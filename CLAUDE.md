@@ -38,7 +38,10 @@ frontend: EFAW £550/session, FAW £1,500/session, up to 12 delegates, on-site.
   under the fixed key `metrics:booking-card`.
 - **`GET /api/metrics/booking-card/summary?days=30`**: totals by event,
   course, page and team size over the last N days (max 366). Needs the header
-  `x-amber-metrics-key` equal to env `METRICS_READ_KEY`; locked when unset.
+  `x-amber-metrics-key`: its SHA-256 must match the hash committed in
+  `bookingCardMetrics.service.ts` (the key is kept privately on Joey's Mac at
+  `~/.amber/metrics-read-key`; Vercel env is not editable by us). Env
+  `METRICS_READ_KEY`, if ever set, takes precedence.
 
 ## Email design (brand)
 - HTML email shell: hosted Amber logo header
@@ -55,7 +58,8 @@ frontend: EFAW £550/session, FAW £1,500/session, up to 12 delegates, on-site.
   (Namecheap Private Email, `mail.privateemail.com:465`) used to send and the
   inbox that receives booking notifications.
 - `DOMAIN_NAME=https://www.ambertraining.co.uk`.
-- `METRICS_READ_KEY`: secret for the booking-card summary endpoint.
+- `METRICS_READ_KEY` (optional): overrides the committed key hash for the
+  booking-card summary endpoint.
 - No Anthropic/OpenAI key (so no server-side AI generation here).
 
 ## Key technical decisions (why)
