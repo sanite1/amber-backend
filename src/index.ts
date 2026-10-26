@@ -7,6 +7,7 @@ import { globalErrorHandler } from "./middlewares/globalErrorHandler";
 import ApiError from "./errors/apiError";
 import contactRoutes from "./routes/contact.routes";
 import bookingAvailabilityRoutes from "./routes/bookingAvailability.routes";
+import metricsRoutes from "./routes/metrics.routes";
 import "./cron/bookingAvailabilityCron";
 
 const PORT = 4000;
@@ -37,6 +38,7 @@ connectDb();
 // are not served.
 app.use("/api/contact", contactRoutes);
 app.use("/api/booking-availability", bookingAvailabilityRoutes);
+app.use("/api/metrics", metricsRoutes);
 
 app.listen(PORT, () => {
   console.log("Server Listening on port 4000...");
