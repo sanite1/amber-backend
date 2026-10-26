@@ -36,9 +36,10 @@ frontend: EFAW £550/session, FAW £1,500/session, up to 12 delegates, on-site.
   user agent, cookie or identifier is stored. Always answers 204. Rate limited
   per IP in memory only, plus an hourly overall ceiling in `RateLimitHit`
   under the fixed key `metrics:booking-card`.
-- **`GET /api/metrics/booking-card/summary?days=30`**: totals by event,
-  course, page and team size over the last N days (max 366). Needs the header
-  `x-amber-metrics-key` equal to env `METRICS_READ_KEY`; locked when unset.
+- There is deliberately **no read route** for these counts (write-only API).
+  Totals are read straight from MongoDB by an internal tool:
+  `npx ts-node --transpile-only scripts/booking-card-summary.ts [days]`
+  (uses `MONGODB_URI` from the local `.env`).
 
 ## Email design (brand)
 - HTML email shell: hosted Amber logo header
@@ -55,7 +56,6 @@ frontend: EFAW £550/session, FAW £1,500/session, up to 12 delegates, on-site.
   (Namecheap Private Email, `mail.privateemail.com:465`) used to send and the
   inbox that receives booking notifications.
 - `DOMAIN_NAME=https://www.ambertraining.co.uk`.
-- `METRICS_READ_KEY`: secret for the booking-card summary endpoint.
 - No Anthropic/OpenAI key (so no server-side AI generation here).
 
 ## Key technical decisions (why)
