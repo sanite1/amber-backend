@@ -26,8 +26,19 @@ frontend: EFAW £550/session, FAW £1,500/session, up to 12 delegates, on-site.
   HTML email shell (`emailShell`, `courseCard`, `detailRow`, `btn`).
 - The pre-existing routes (users, courses, payment, admin, etc.) are legacy from
   the original tutoring-marketplace template. Since 30 Sep 2026 they are NOT
-  mounted (security): only `/api/contact` and `/api/booking-availability` are
-  served. Do not re-mount them.
+  mounted (security): only `/api/contact`, `/api/booking-availability` and
+  `/api/metrics` are served. Do not re-mount them.
+- **`POST /api/metrics/booking-card`** (since 26 Oct 2026): the website's
+  booking card sends `{event: "start"|"submit", from, course, people}` with
+  `navigator.sendBeacon` (text/plain JSON). Every field is checked against an
+  allow-list; daily aggregate counters (`BookingCardCount`, keyed by London
+  day, event, from, course, people) are raised with upsert + `$inc`. No IP,
+  user agent, cookie or identifier is stored. Always answers 204. Rate limited
+  per IP in memory only, plus an hourly overall ceiling in `RateLimitHit`
+  under the fixed key `metrics:booking-card`.
+- **`GET /api/metrics/booking-card/summary?days=30`**: totals by event,
+  course, page and team size over the last N days (max 366). Needs the header
+  `x-amber-metrics-key` equal to env `METRICS_READ_KEY`; locked when unset.
 
 ## Email design (brand)
 - HTML email shell: hosted Amber logo header
@@ -44,6 +55,7 @@ frontend: EFAW £550/session, FAW £1,500/session, up to 12 delegates, on-site.
   (Namecheap Private Email, `mail.privateemail.com:465`) used to send and the
   inbox that receives booking notifications.
 - `DOMAIN_NAME=https://www.ambertraining.co.uk`.
+- `METRICS_READ_KEY`: secret for the booking-card summary endpoint.
 - No Anthropic/OpenAI key (so no server-side AI generation here).
 
 ## Key technical decisions (why)
