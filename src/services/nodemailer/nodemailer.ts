@@ -1,6 +1,4 @@
 import { createTransport } from "nodemailer";
-import hbs from "nodemailer-express-handlebars";
-import path from "path";
 
 // Create a transporter using Namecheap Email Hosting SMTP settings
 const transporter = createTransport({
@@ -15,18 +13,6 @@ const transporter = createTransport({
   // Certificates are verified (Node's default). mail.privateemail.com presents
   // a valid Sectigo certificate, checked 30 Sep 2026.
 });
-
-// Configure Handlebars for email templates
-const handlebarOptions = {
-  viewEngine: {
-    partialsDir: path.resolve("src/services/nodemailer/templates"),
-    defaultLayout: "",
-  },
-  viewPath: path.resolve("src/services/nodemailer/templates"),
-};
-
-// Use Handlebars for template compilation
-transporter.use("compile", hbs(handlebarOptions));
 
 // Verify connection configuration
 transporter.verify((error: any, success: any) => {
