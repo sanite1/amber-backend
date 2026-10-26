@@ -286,6 +286,12 @@ const ukDate = (v?: string) => {
       });
 };
 
+// Client-facing date: "flexible" (the form's "To be confirmed") reads as such.
+const clientDate = (v?: string) => {
+  const s = (v || "").trim();
+  return !s || s === "flexible" ? "To be confirmed" : esc(ukDate(s));
+};
+
 // A clean label/value row for the details table.
 const detailRow = (label: string, value: string) => `
   <tr>
@@ -331,7 +337,7 @@ const emailShell = (opts: {
   </td></tr>
   <tr><td style="background:${BRAND.secondary};padding:24px 32px;font-family:${HEAD_FONT};color:#ffffff;font-size:13px;line-height:1.7;">
     <strong style="color:#ffffff;font-size:15px;">Amber Training</strong><br/>
-    On-site first aid training at your workplace<br/>
+    On-site first aid training<br/>
     <span style="color:${BRAND.primary};">&bull;</span> <a href="mailto:support@ambertraining.co.uk" style="color:#ffffff;text-decoration:underline;">support@ambertraining.co.uk</a> &nbsp;&nbsp;
     <span style="color:${BRAND.primary};">&bull;</span> +44 7763 658885<br/>
     <span style="color:rgba(255,255,255,0.75);">Based in London. We train teams anywhere in England.</span>
@@ -470,21 +476,28 @@ export const sendBookingEnquiryMail = async (b: BookingEnquiryPayload) => {
     await transporter.sendMail({
       from: `"Amber Training" <${process.env.AUTH_EMAIL}>`,
       to: b.email,
-      subject: "Amber Training: we've received your first aid training request",
+      subject: "Amber Training: your booking has been received",
       html: emailShell({
-        title: "Thank you, we've received your request",
+        title: "Thank you. Your booking has been received.",
         preheader:
-          "We'll be in touch within 24 hours with your confirmation and invoice.",
+          "Your agreement and invoice will be sent by email within one working day.",
         contentHtml: `
-          <p style="margin:0 0 16px;">Hi ${esc(b.contactName)},</p>
-          <p style="margin:0 0 20px;">Thank you for your enquiry. We've received your request for on-site first aid training for <strong>${esc(b.companyName)}</strong>, and one of our team will be in touch <strong>within 24 hours</strong> with your confirmation and invoice. There is no payment needed to secure your booking.</p>
+          <p style="margin:0 0 16px;">Dear ${esc(b.contactName)},</p>
+          <p style="margin:0 0 20px;">Thank you for booking on-site first aid training for <strong>${esc(b.companyName)}</strong>. Your agreement and invoice will be sent by email <strong>within one working day</strong>. No payment until your booking is confirmed.</p>
           ${courseCard(b.courseType)}
           <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #efe9e1;border-radius:8px;overflow:hidden;margin:0 0 22px;">
             ${detailRow("Number of delegates", esc(b.delegates) || "To be confirmed")}
-            ${detailRow("Preferred dates", esc(ukDate(b.preferredDates)) || "To be confirmed")}
+            ${detailRow("Preferred date", clientDate(b.preferredDates))}
             ${detailRow("Venue", esc(b.venueAddress) || "To be confirmed")}
           </table>
-          <p style="margin:0 0 18px;">If anything is urgent, just reply to this email and we will be glad to help.</p>
+          <h2 style="margin:0 0 10px;font-family:${HEAD_FONT};color:${BRAND.secondary};font-size:17px;font-weight:700;">What happens next</h2>
+          <ol style="margin:0 0 20px;padding-left:20px;">
+            <li style="margin:0 0 6px;">We confirm your date and send your agreement and invoice within one working day.</li>
+            <li style="margin:0 0 6px;">You sign the agreement and pay the deposit by bank transfer.</li>
+            <li style="margin:0;">Our trainer brings all equipment on the day. Certificates are issued by email the next working day.</li>
+          </ol>
+          <p style="margin:0 0 18px;">Room, equipment and timings for the day are set out in our <a href="https://www.ambertraining.co.uk/preparing-for-your-course" style="color:#C2410C;text-decoration:underline;">guide to preparing for your course</a>.</p>
+          <p style="margin:0 0 18px;">For any questions about your booking, reply to this email.</p>
           <p style="margin:0;">Kind regards,<br/><strong>The Amber Training team</strong></p>
         `,
       }),
