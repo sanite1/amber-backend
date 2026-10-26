@@ -1,5 +1,4 @@
 import { Request } from "express";
-import { createHash, timingSafeEqual } from "crypto";
 import moment from "moment-timezone";
 import BookingCardCount from "../models/BookingCardCount";
 import RateLimitHit from "../models/RateLimitHit";
@@ -135,21 +134,13 @@ export const allowBookingCardEvent = async (req: Request) => {
   return true;
 };
 
-/**
- * Check the secret header for the summary. The key lives in the env var
- * METRICS_READ_KEY; with no key set, nobody can read the summary.
- */
-export const hasMetricsKey = (provided: unknown) => {
-  const expected = process.env.METRICS_READ_KEY;
-  if (!expected || typeof provided !== "string" || !provided) return false;
-  const digest = (s: string) => createHash("sha256").update(s).digest();
-  return timingSafeEqual(digest(provided), digest(expected));
-};
-
 type Pair = { start: number; submit: number };
 const emptyPair = (): Pair => ({ start: 0, submit: 0 });
 
-/** Totals over the last `days` days (today included), London dates. */
+/**
+ * Totals over the last `days` days (today included), London dates. Internal
+ * only: used by scripts/booking-card-summary.ts, never exposed over HTTP.
+ */
 export const summariseBookingCard = async (days: number) => {
   const toDay = londonDay();
   const fromDay = moment

@@ -1,8 +1,5 @@
 import express from "express";
-import {
-  getBookingCardSummaryController,
-  recordBookingCardController,
-} from "../controllers/metrics.controller";
+import { recordBookingCardController } from "../controllers/metrics.controller";
 
 const router = express.Router();
 
@@ -18,7 +15,7 @@ const beaconText: express.RequestHandler = (req, res, next) =>
 // POST /api/metrics/booking-card  -> count a booking-card start or submit
 router.post("/booking-card", beaconText, recordBookingCardController);
 
-// GET /api/metrics/booking-card/summary?days=30  -> totals (secret header)
-router.get("/booking-card/summary", getBookingCardSummaryController);
+// Write-only: there is deliberately no read route. Totals are read straight
+// from the database by an internal tool (scripts/booking-card-summary.ts).
 
 export default router;
