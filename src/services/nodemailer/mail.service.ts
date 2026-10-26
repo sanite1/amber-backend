@@ -203,7 +203,7 @@ export interface BookingEnquiryPayload {
   contactName: string;
   email: string;
   phone?: string;
-  courseType: string; // EFAW | FAW | PFA
+  courseType: string; // EFAW | FAW | FAW_REQUAL | PFA
   delegates?: string | number;
   preferredDates?: string;
   venueAddress?: string;
@@ -247,6 +247,13 @@ const courseInfo = (type: string) => {
       name: "Paediatric First Aid",
       price: "£995 per session, all-inclusive",
       meta: "2 days (12 hours) · up to 12 delegates · on-site",
+    };
+  }
+  if (t === "FAW_REQUAL") {
+    return {
+      name: "First Aid at Work Requalification",
+      price: "£1,050 per session, all-inclusive",
+      meta: "2 days · up to 12 delegates · on-site",
     };
   }
   if (t === "FAW") {
