@@ -10,7 +10,7 @@ import RateLimitHit from "../models/RateLimitHit";
 const TIMEZONE = "Europe/London";
 
 export const EVENTS = ["start", "submit"] as const;
-export const COURSES = ["efaw", "faw", "faw_requal"] as const;
+export const COURSES = ["efaw", "faw", "faw_requal", "bls"] as const;
 export const PEOPLE = ["1-4", "5-8", "9-12", "13+"] as const;
 // Page slugs as the website names them ("home", "course-faw_requal",
 // "area-enfield"): lower-case letters, digits, hyphens and underscores.
