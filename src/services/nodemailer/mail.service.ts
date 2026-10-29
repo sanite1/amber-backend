@@ -75,27 +75,27 @@ const courseInfo = (type: string) => {
   if (t === "BLS") {
     return {
       name: "CPR, Defibrillator and Anaphylaxis",
-      price: "£350 per session, all-inclusive",
+      price: "£415 per session, all-inclusive",
       meta: "3 hours · up to 12 delegates · on-site",
     };
   }
   if (t === "FAW_REQUAL") {
     return {
       name: "First Aid at Work Requalification",
-      price: "£1,050 per session, all-inclusive",
+      price: "£1,115 per session, all-inclusive",
       meta: "2 days · up to 12 delegates · on-site",
     };
   }
   if (t === "FAW") {
     return {
       name: "First Aid at Work",
-      price: "£1,500 per session, all-inclusive",
+      price: "£1,595 per session, all-inclusive",
       meta: "3 days · up to 12 delegates · on-site",
     };
   }
   return {
     name: "Emergency First Aid at Work",
-    price: "£550 per session, all-inclusive",
+    price: "£645 per session, all-inclusive",
     meta: "1 day · up to 12 delegates · on-site",
   };
 };
