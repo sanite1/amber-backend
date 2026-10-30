@@ -13,7 +13,7 @@ const BookingCardCountSchema = new Schema({
   event: { type: String, required: true },
   // The page the card sits on, e.g. "home" or "area-enfield".
   from: { type: String, required: true },
-  // "efaw", "faw" or "faw_requal".
+  // "efaw", "faw", "faw_requal", "bls" or "epfa".
   course: { type: String, required: true },
   // "1-4", "5-8", "9-12", "13+", or "" for a start.
   people: { type: String, default: "" },

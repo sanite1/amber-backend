@@ -26,7 +26,7 @@ export interface BookingEnquiryPayload {
   contactName: string;
   email: string;
   phone?: string;
-  courseType: string; // EFAW | FAW | FAW_REQUAL | PFA
+  courseType: string; // EFAW | FAW | FAW_REQUAL | PFA | BLS | EPFA
   delegates?: string | number;
   preferredDates?: string;
   venueAddress?: string;
@@ -72,23 +72,37 @@ const courseInfo = (type: string) => {
       meta: "2 days (12 hours) · up to 12 delegates · on-site",
     };
   }
+  if (t === "EPFA") {
+    return {
+      name: "Emergency Paediatric First Aid",
+      price: "£645 per session, all-inclusive",
+      meta: "1 day · up to 12 delegates · on-site",
+    };
+  }
+  if (t === "BLS") {
+    return {
+      name: "CPR, Defibrillator and Anaphylaxis",
+      price: "£415 per session, all-inclusive",
+      meta: "3 hours · up to 12 delegates · on-site",
+    };
+  }
   if (t === "FAW_REQUAL") {
     return {
       name: "First Aid at Work Requalification",
-      price: "£1,050 per session, all-inclusive",
+      price: "£1,115 per session, all-inclusive",
       meta: "2 days · up to 12 delegates · on-site",
     };
   }
   if (t === "FAW") {
     return {
       name: "First Aid at Work",
-      price: "£1,500 per session, all-inclusive",
+      price: "£1,595 per session, all-inclusive",
       meta: "3 days · up to 12 delegates · on-site",
     };
   }
   return {
     name: "Emergency First Aid at Work",
-    price: "£550 per session, all-inclusive",
+    price: "£645 per session, all-inclusive",
     meta: "1 day · up to 12 delegates · on-site",
   };
 };
