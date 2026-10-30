@@ -17,7 +17,7 @@ const SUCCESS_BOOKING =
   "Thank you. Your booking has been received. Your agreement and invoice will be sent by email within one working day.";
 const SUCCESS_ENQUIRY =
   "Thank you for your enquiry. We will be in touch shortly.";
-const COURSES = ["EFAW", "FAW", "FAW_REQUAL", "PFA", "BLS"];
+const COURSES = ["EFAW", "FAW", "FAW_REQUAL", "PFA", "BLS", "EPFA"];
 
 // Handle a B2B on-site training booking / quote request.
 export const createBookingEnquiryController = async (

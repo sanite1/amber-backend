@@ -26,7 +26,7 @@ export interface BookingEnquiryPayload {
   contactName: string;
   email: string;
   phone?: string;
-  courseType: string; // EFAW | FAW | FAW_REQUAL | PFA | BLS
+  courseType: string; // EFAW | FAW | FAW_REQUAL | PFA | BLS | EPFA
   delegates?: string | number;
   preferredDates?: string;
   venueAddress?: string;
@@ -70,6 +70,13 @@ const courseInfo = (type: string) => {
       name: "Paediatric First Aid",
       price: "£995 per session, all-inclusive",
       meta: "2 days (12 hours) · up to 12 delegates · on-site",
+    };
+  }
+  if (t === "EPFA") {
+    return {
+      name: "Emergency Paediatric First Aid",
+      price: "£645 per session, all-inclusive",
+      meta: "1 day · up to 12 delegates · on-site",
     };
   }
   if (t === "BLS") {
