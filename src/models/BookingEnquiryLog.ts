@@ -42,6 +42,8 @@ const BookingEnquiryLogSchema = new Schema(
     // One-time reference handed to the confirmation page so the client can add
     // the annual refresher offer to this booking (random, never shown in email).
     addonRef: { type: String, index: true, sparse: true },
+    // The reference stops working after this (14 days after the course).
+    offerUntil: { type: Date },
     // Add-ons the client accepted after booking (refresher offer, Nov 2026).
     addons: {
       type: [
