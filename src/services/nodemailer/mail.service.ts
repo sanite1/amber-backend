@@ -1,5 +1,6 @@
 import ApiError from "../../errors/apiError";
 import transporter from "./nodemailer";
+import { REFRESHER_OFFER, poundsText } from "../refresherOffer";
 
 // B2B on-site training booking / quote request -> lands in the inbox.
 export interface BookingAttribution {
@@ -343,6 +344,73 @@ export const sendBookingEnquiryMail = async (b: BookingEnquiryPayload) => {
     console.error("Client confirmation email failed (non-fatal):", error);
   }
 
+  return true;
+};
+
+// The client added the annual refresher offer on the confirmation page.
+// Subject "Refresher added: {company}" is read by the CRM mail capture
+// (contract C1): change both together.
+export interface RefresherAddedPayload {
+  companyName: string;
+  contactName: string;
+  email: string;
+  courseType: string;
+  delegates?: string;
+  preferredDates?: string;
+}
+
+export const sendRefresherAddedMail = async (r: RefresherAddedPayload) => {
+  const price = poundsText(REFRESHER_OFFER.pricePence);
+  const was = poundsText(REFRESHER_OFFER.wasPence);
+  await transporter.sendMail({
+    from: `"Amber Training Bookings" <${process.env.AUTH_EMAIL}>`,
+    to: process.env.AUTH_EMAIL,
+    replyTo: r.email,
+    subject: `Refresher added: ${r.companyName}`,
+    html: emailShell({
+      title: "Annual refresher added to a booking",
+      preheader: `${r.companyName} added the annual refresher at ${price}`,
+      contentHtml: `
+      <p style="margin:0 0 20px;">The client accepted the refresher offer on the booking confirmation page. Add it to their invoice as a separate line.</p>
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #efe9e1;border-radius:8px;overflow:hidden;margin:0 0 22px;">
+        ${detailRow("Company", esc(r.companyName))}
+        ${detailRow("Contact name", esc(r.contactName))}
+        ${detailRow("Email", `<a href="mailto:${esc(r.email)}" style="color:${BRAND.primary};">${esc(r.email)}</a>`)}
+        ${detailRow("Course booked", esc(courseInfo(r.courseType).name))}
+        ${detailRow("Number of delegates", esc(r.delegates) || "Not specified")}
+        ${detailRow("Preferred dates", esc(ukDate(r.preferredDates)) || "Flexible")}
+        ${detailRow("Add-on", esc(REFRESHER_OFFER.name))}
+        ${detailRow("Add-on price", `${esc(price)} (catalogue ${esc(was)})`)}
+      </table>
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:${BRAND.cream};border-radius:8px;margin:0 0 8px;">
+        <tr><td style="padding:18px 20px;font-family:${HEAD_FONT};color:${BRAND.secondary};font-size:14px;line-height:1.6;">
+          <strong>Action needed:</strong> add the refresher line (${esc(price)}) to this client's invoice. It is paid with the course, can be removed any time before payment, and is held about 12 months after the course on a date agreed later.
+        </td></tr>
+      </table>`,
+    }),
+  });
+
+  // Best-effort confirmation to the client.
+  try {
+    await transporter.sendMail({
+      from: `"Amber Training" <${process.env.AUTH_EMAIL}>`,
+      to: r.email,
+      subject: "Amber Training: your annual refresher is added",
+      html: emailShell({
+        title: "Your annual refresher is added",
+        preheader: `It will be on your invoice at ${price}.`,
+        contentHtml: `
+          <p style="margin:0 0 16px;">Dear ${esc(r.contactName)},</p>
+          <p style="margin:0 0 16px;">Thank you. The ${esc(REFRESHER_OFFER.name)} is added to your booking for <strong>${esc(r.companyName)}</strong> at <strong>${esc(price)}</strong>, today's price.</p>
+          <p style="margin:0 0 16px;">It will be a separate line on your invoice. It is half a day at your venue, for up to 12 of your staff, about 12 months after your course. We will be in touch nearer the time to agree a date.</p>
+          <p style="margin:0 0 18px;">If you would like to remove it, reply to this email any time before you pay the invoice.</p>
+          <p style="margin:0;">Kind regards,<br/><strong>The Amber Training team</strong></p>
+        `,
+      }),
+    });
+  } catch (error) {
+    console.error("Refresher client confirmation failed (non-fatal):", error);
+  }
   return true;
 };
 

@@ -1,10 +1,13 @@
 import { Request, Response, NextFunction } from "express";
 import ApiResponse from "../errors/apiResponse";
 import ApiError from "../errors/apiError";
+import { randomBytes } from "crypto";
 import {
   sendEnquiryMail,
   sendBookingEnquiryMail,
+  sendRefresherAddedMail,
 } from "../services/nodemailer/mail.service";
+import { REFRESHER_OFFER, refresherEligible } from "../services/refresherOffer";
 import BookingEnquiryLog from "../models/BookingEnquiryLog";
 import {
   assessSubmission,
@@ -113,10 +116,20 @@ export const createBookingEnquiryController = async (
       spamFlags,
     });
 
+    // The refresher offer on the confirmation page needs a reference to this
+    // booking. Only clean bookings of eligible courses get one, and only when
+    // the log below is written (it is what the reference points to).
+    const offerRef =
+      !spamFlags.length && refresherEligible(courseType)
+        ? randomBytes(24).toString("hex")
+        : undefined;
+    let logged = false;
+
     // Durable, scannable record of the enquiry and where it came from.
     // Best-effort: a logging failure must never fail a real enquiry.
     try {
       await BookingEnquiryLog.create({
+        addonRef: offerRef,
         companyName,
         contactName,
         email,
@@ -134,6 +147,7 @@ export const createBookingEnquiryController = async (
           ? Number(body.fillMs)
           : undefined,
       });
+      logged = true;
     } catch (logError) {
       console.error(
         "booking enquiry log write failed:",
@@ -141,7 +155,22 @@ export const createBookingEnquiryController = async (
       );
     }
 
-    return res.status(200).json(new ApiResponse(200, SUCCESS_BOOKING));
+    return res.status(200).json(
+      new ApiResponse(
+        200,
+        SUCCESS_BOOKING,
+        offerRef && logged
+          ? {
+              offer: {
+                ref: offerRef,
+                code: REFRESHER_OFFER.code,
+                pricePence: REFRESHER_OFFER.pricePence,
+                wasPence: REFRESHER_OFFER.wasPence,
+              },
+            }
+          : undefined,
+      ),
+    );
   } catch (error) {
     if (error instanceof ApiError) {
       return res
@@ -288,5 +317,73 @@ export const createEnquiryController = async (
     }
     console.error("❗ Failed to send enquiry:", error);
     return next(new ApiError(500, "Failed to send enquiry. Please try again."));
+  }
+};
+
+// The client accepted the annual refresher offer on the confirmation page.
+// The reference is the random one handed out with their booking, so only the
+// person who made the booking can add it. Adding twice changes nothing.
+export const addBookingAddonController = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const ref = clip(req.body?.ref, 64);
+    const code = clip(req.body?.code, 40)?.toUpperCase();
+    if (!ref || !/^[a-f0-9]{48}$/.test(ref) || code !== REFRESHER_OFFER.code) {
+      return next(new ApiError(400, "This offer could not be found."));
+    }
+    const log = await BookingEnquiryLog.findOne({ addonRef: ref });
+    const created = (log as any)?.createdAt as Date | undefined;
+    if (
+      !log ||
+      !refresherEligible(String(log.courseType)) ||
+      !created ||
+      Date.now() - created.getTime() > REFRESHER_OFFER.webWindowMs
+    ) {
+      return next(new ApiError(404, "This offer is no longer available."));
+    }
+    const already = (log.addons || []).some(
+      (a: any) => a.code === REFRESHER_OFFER.code,
+    );
+    if (!already) {
+      await BookingEnquiryLog.updateOne(
+        { _id: log._id, "addons.code": { $ne: REFRESHER_OFFER.code } },
+        {
+          $push: {
+            addons: {
+              code: REFRESHER_OFFER.code,
+              pricePence: REFRESHER_OFFER.pricePence,
+              addedAt: new Date(),
+            },
+          },
+        },
+      );
+      await sendRefresherAddedMail({
+        companyName: String(log.companyName || ""),
+        contactName: String(log.contactName || ""),
+        email: String(log.email || ""),
+        courseType: String(log.courseType || ""),
+        delegates: log.delegates ? String(log.delegates) : undefined,
+        preferredDates: log.preferredDates
+          ? String(log.preferredDates)
+          : undefined,
+      });
+    }
+    return res
+      .status(200)
+      .json(new ApiResponse(200, "Refresher added.", { added: true }));
+  } catch (error) {
+    console.error(
+      "refresher add failed:",
+      error instanceof Error ? error.message : error,
+    );
+    return next(
+      new ApiError(
+        500,
+        "Sorry, we could not add the refresher. Please reply to your confirmation email and we will add it for you.",
+      ),
+    );
   }
 };
