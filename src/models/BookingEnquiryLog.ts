@@ -39,6 +39,23 @@ const BookingEnquiryLogSchema = new Schema(
       gclid: { type: String },
       firstSeen: { type: String },
     },
+    // One-time reference handed to the confirmation page so the client can add
+    // the annual refresher offer to this booking (random, never shown in email).
+    addonRef: { type: String, index: true, sparse: true },
+    // The reference stops working after this (14 days after the course).
+    offerUntil: { type: Date },
+    // Add-ons the client accepted after booking (refresher offer, Nov 2026).
+    addons: {
+      type: [
+        {
+          code: { type: String },
+          pricePence: { type: Number },
+          addedAt: { type: Date },
+          _id: false,
+        },
+      ],
+      default: undefined,
+    },
     // Pages viewed on the visit they enquired from, in order.
     journey: {
       type: [{ path: { type: String }, at: { type: String }, _id: false }],

@@ -1,5 +1,6 @@
 import ApiError from "../../errors/apiError";
 import transporter from "./nodemailer";
+import { REFRESHER_OFFER, poundsText } from "../refresherOffer";
 
 // B2B on-site training booking / quote request -> lands in the inbox.
 export interface BookingAttribution {
@@ -37,6 +38,8 @@ export interface BookingEnquiryPayload {
   journey?: PageView[];
   /** Reasons the submission looks like spam; empty or absent when clean. */
   spamFlags?: string[];
+  /** Refresher offer reference: adds the offer to the client confirmation. */
+  offerRef?: string;
 }
 
 const esc = (v: unknown) =>
@@ -254,6 +257,28 @@ const attributionBlock = (a?: BookingAttribution, journey?: PageView[]) => {
       </table>`;
 };
 
+// The refresher offer in the client's booking confirmation: same message as
+// the confirmation page, one button to /refresher?ref=... (the reference works
+// until 14 days after the course).
+const refresherOfferBlock = (ref: string) => {
+  const price = poundsText(REFRESHER_OFFER.pricePence);
+  const saving = poundsText(
+    REFRESHER_OFFER.wasPence - REFRESHER_OFFER.pricePence,
+  );
+  const href = `${REFRESHER_OFFER.pageUrl}?ref=${encodeURIComponent(ref)}`;
+  return `
+          <p style="margin:0 0 8px;font-family:${HEAD_FONT};font-size:12px;font-weight:700;color:#C2410C;text-transform:uppercase;letter-spacing:0.08em;">Recommended for your team</p>
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #efe9e1;border-radius:8px;margin:0 0 24px;">
+            <tr><td style="padding:18px 20px;font-family:${HEAD_FONT};color:${BRAND.secondary};font-size:15px;line-height:1.6;">
+              <strong style="font-size:17px;color:#2f3138;">Keep your first aiders ready next year</strong><br/>
+              First aid skills fade without practice. The HSE recommends a half-day refresher each year, at your venue.
+              <p style="margin:12px 0 14px;"><strong style="font-size:20px;color:#2f3138;">${esc(price)}</strong> <span style="text-decoration:line-through;">${esc(poundsText(REFRESHER_OFFER.wasPence))}</span> <strong style="color:#C2410C;">Save ${esc(saving)}</strong></p>
+              ${btn(href, `Add refresher for ${price}`)}
+              <p style="margin:12px 0 0;font-size:13px;">Added to your invoice at today's price. Remove it any time before you pay. Available until 14 days after your course.</p>
+            </td></tr>
+          </table>`;
+};
+
 export const sendBookingEnquiryMail = async (b: BookingEnquiryPayload) => {
   const flagged = Boolean(b.spamFlags && b.spamFlags.length);
   const replyHref = `mailto:${b.email}?subject=${encodeURIComponent(
@@ -327,6 +352,7 @@ export const sendBookingEnquiryMail = async (b: BookingEnquiryPayload) => {
             ${detailRow("Preferred date", clientDate(b.preferredDates))}
             ${detailRow("Venue", esc(b.venueAddress) || "To be confirmed")}
           </table>
+          ${b.offerRef ? refresherOfferBlock(b.offerRef) : ""}
           <h2 style="margin:0 0 10px;font-family:${HEAD_FONT};color:${BRAND.secondary};font-size:17px;font-weight:700;">What happens next</h2>
           <ol style="margin:0 0 20px;padding-left:20px;">
             <li style="margin:0 0 6px;">We confirm your date and send your agreement and invoice within one working day.</li>
@@ -343,6 +369,149 @@ export const sendBookingEnquiryMail = async (b: BookingEnquiryPayload) => {
     console.error("Client confirmation email failed (non-fatal):", error);
   }
 
+  return true;
+};
+
+// The client added the annual refresher offer on the confirmation page.
+// Subject "Refresher added: {company}" is read by the CRM mail capture
+// (contract C1): change both together.
+export interface RefresherAddedPayload {
+  companyName: string;
+  contactName: string;
+  email: string;
+  courseType: string;
+  delegates?: string;
+  preferredDates?: string;
+}
+
+export const sendRefresherAddedMail = async (r: RefresherAddedPayload) => {
+  const price = poundsText(REFRESHER_OFFER.pricePence);
+  const was = poundsText(REFRESHER_OFFER.wasPence);
+  await transporter.sendMail({
+    from: `"Amber Training Bookings" <${process.env.AUTH_EMAIL}>`,
+    to: process.env.AUTH_EMAIL,
+    replyTo: r.email,
+    subject: `Refresher added: ${r.companyName}`,
+    html: emailShell({
+      title: "Annual refresher added to a booking",
+      preheader: `${r.companyName} added the annual refresher at ${price}`,
+      contentHtml: `
+      <p style="margin:0 0 20px;">The client accepted the refresher offer on the booking confirmation page. Add it to their invoice as a separate line.</p>
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #efe9e1;border-radius:8px;overflow:hidden;margin:0 0 22px;">
+        ${detailRow("Company", esc(r.companyName))}
+        ${detailRow("Contact name", esc(r.contactName))}
+        ${detailRow("Email", `<a href="mailto:${esc(r.email)}" style="color:${BRAND.primary};">${esc(r.email)}</a>`)}
+        ${detailRow("Course booked", esc(courseInfo(r.courseType).name))}
+        ${detailRow("Number of delegates", esc(r.delegates) || "Not specified")}
+        ${detailRow("Preferred dates", esc(ukDate(r.preferredDates)) || "Flexible")}
+        ${detailRow("Add-on", esc(REFRESHER_OFFER.name))}
+        ${detailRow("Add-on price", `${esc(price)} (catalogue ${esc(was)})`)}
+      </table>
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:${BRAND.cream};border-radius:8px;margin:0 0 8px;">
+        <tr><td style="padding:18px 20px;font-family:${HEAD_FONT};color:${BRAND.secondary};font-size:14px;line-height:1.6;">
+          <strong>Action needed:</strong> add the refresher line (${esc(price)}) to this client's invoice. It is paid with the course, can be removed any time before payment, and is held about 12 months after the course on a date agreed later.
+        </td></tr>
+      </table>`,
+    }),
+  });
+
+  // Best-effort confirmation to the client.
+  try {
+    await transporter.sendMail({
+      from: `"Amber Training" <${process.env.AUTH_EMAIL}>`,
+      to: r.email,
+      subject: "Amber Training: your annual refresher is added",
+      html: emailShell({
+        title: "Your annual refresher is added",
+        preheader: `It will be on your invoice at ${price}.`,
+        contentHtml: `
+          <p style="margin:0 0 16px;">Dear ${esc(r.contactName)},</p>
+          <p style="margin:0 0 16px;">Thank you. The ${esc(REFRESHER_OFFER.name)} is added to your booking for <strong>${esc(r.companyName)}</strong> at <strong>${esc(price)}</strong>, today's price.</p>
+          <p style="margin:0 0 16px;">It will be a separate line on your invoice. It is half a day at your venue, for up to 12 of your staff, about 12 months after your course. We will be in touch nearer the time to agree a date.</p>
+          <p style="margin:0 0 18px;">If you would like to remove it, reply to this email any time before you pay the invoice.</p>
+          <p style="margin:0;">Kind regards,<br/><strong>The Amber Training team</strong></p>
+        `,
+      }),
+    });
+  } catch (error) {
+    console.error("Refresher client confirmation failed (non-fatal):", error);
+  }
+  return true;
+};
+
+// Public refresher request form. Subject "Refresher requested: {company}" is
+// read by the CRM mail capture (contract C1): change both together.
+export interface RefresherRequestPayload {
+  companyName: string;
+  contactName: string;
+  email: string;
+  courseDate?: string;
+  from?: string;
+  spamFlags?: string[];
+}
+
+const REQUEST_SOURCES: Record<string, string> = {
+  card: "Training-day card",
+  certificates: "Certificates email",
+};
+
+export const sendRefresherRequestMail = async (r: RefresherRequestPayload) => {
+  const price = poundsText(REFRESHER_OFFER.pricePence);
+  const was = poundsText(REFRESHER_OFFER.wasPence);
+  const source = REQUEST_SOURCES[r.from || ""] || "Website";
+  try {
+    await transporter.sendMail({
+      from: `"Amber Training Bookings" <${process.env.AUTH_EMAIL}>`,
+      to: process.env.AUTH_EMAIL,
+      replyTo: r.email,
+      subject: `${spamPrefix(r.spamFlags)}Refresher requested: ${r.companyName}`,
+      html: emailShell({
+        title: "Annual refresher requested",
+        preheader: `${r.companyName} asked to add the annual refresher at ${price}`,
+        contentHtml: `
+      ${spamBanner(r.spamFlags)}
+      <p style="margin:0 0 20px;">A client asked to add the annual refresher using the refresher form. Find their booking, check the course was within the last 14 days, and add it to their invoice as a separate line.</p>
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #efe9e1;border-radius:8px;overflow:hidden;margin:0 0 22px;">
+        ${detailRow("Company", esc(r.companyName))}
+        ${detailRow("Contact name", esc(r.contactName))}
+        ${detailRow("Email", `<a href="mailto:${esc(r.email)}" style="color:${BRAND.primary};">${esc(r.email)}</a>`)}
+        ${detailRow("Course date", esc(ukDate(r.courseDate)) || "Not given")}
+        ${detailRow("Add-on", esc(REFRESHER_OFFER.name))}
+        ${detailRow("Add-on price", `${esc(price)} (catalogue ${esc(was)})`)}
+        ${detailRow("Source", esc(source))}
+      </table>`,
+      }),
+    });
+  } catch (error) {
+    console.error("Refresher request email failed:", error);
+    throw new ApiError(
+      500,
+      "Sorry, we could not send your request. Please email support@ambertraining.co.uk.",
+    );
+  }
+  if (r.spamFlags && r.spamFlags.length) return true;
+  try {
+    await transporter.sendMail({
+      from: `"Amber Training" <${process.env.AUTH_EMAIL}>`,
+      to: r.email,
+      subject: "Amber Training: your refresher request",
+      html: emailShell({
+        title: "Thank you for your refresher request",
+        preheader: `We will add the annual refresher to your booking at ${price}.`,
+        contentHtml: `
+          <p style="margin:0 0 16px;">Dear ${esc(r.contactName)},</p>
+          <p style="margin:0 0 16px;">Thank you. We will add the ${esc(REFRESHER_OFFER.name)} to the booking for <strong>${esc(r.companyName)}</strong> at <strong>${esc(price)}</strong> and confirm by email within one working day.</p>
+          <p style="margin:0 0 18px;">It is half a day at your venue, for up to 12 of your staff, about 12 months after your course. We will be in touch nearer the time to agree a date.</p>
+          <p style="margin:0;">Kind regards,<br/><strong>The Amber Training team</strong></p>
+        `,
+      }),
+    });
+  } catch (error) {
+    console.error(
+      "Refresher request acknowledgement failed (non-fatal):",
+      error,
+    );
+  }
   return true;
 };
 

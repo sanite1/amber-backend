@@ -8,11 +8,13 @@ a single serverless function (`src/index.ts`, see `vercel.json`). Production URL
 (`amber-mvp`) and calls this API at `/api`.
 
 ## Goal
+
 Receive B2B booking/quote enquiries from the frontend `/book` form and email
 them to `support@ambertraining.co.uk` (no payment taken). Pricing is set on the
 frontend: EFAW £550/session, FAW £1,500/session, up to 12 delegates, on-site.
 
 ## What is built and live
+
 - **`POST /api/contact/booking`** — the B2B booking/quote endpoint
   (`src/controllers/contact.controller.ts` → `src/routes/contact.routes.ts`).
   Validates company/contact/email/courseType. Captures company, contact, email,
@@ -42,6 +44,7 @@ frontend: EFAW £550/session, FAW £1,500/session, up to 12 delegates, on-site.
   (uses `MONGODB_URI` from the local `.env`).
 
 ## Email design (brand)
+
 - HTML email shell: hosted Amber logo header
   (`https://res.cloudinary.com/dv4uk8qqc/image/upload/v1745396912/Amber_Users/vs3ygjavp7jwjp7gdqws.png`),
   `#FF7C22` accent bar, Raleway headings / Lora body with Arial/Georgia
@@ -51,6 +54,7 @@ frontend: EFAW £550/session, FAW £1,500/session, up to 12 delegates, on-site.
 - All user input is HTML-escaped (`esc`).
 
 ## Env (in `.env`, never committed)
+
 - `MONGODB_URI`. (`JWT_SECRET`, Cloudinary and Stripe vars are no longer used.)
 - `AUTH_EMAIL=support@ambertraining.co.uk`, `AUTH_PASS` — the SMTP mailbox
   (Namecheap Private Email, `mail.privateemail.com:465`) used to send and the
@@ -59,6 +63,7 @@ frontend: EFAW £550/session, FAW £1,500/session, up to 12 delegates, on-site.
 - No Anthropic/OpenAI key (so no server-side AI generation here).
 
 ## Key technical decisions (why)
+
 - **Inline HTML emails, not handlebars templates:** self-contained, brand-styled,
   no template-file dependency.
 - **Hosted Cloudinary logo** in emails: email clients need an absolute image URL;
@@ -74,6 +79,7 @@ frontend: EFAW £550/session, FAW £1,500/session, up to 12 delegates, on-site.
   real enquiry on a soft signal.
 
 ## Deploy / Git
+
 - **Production branch = `develop`** → auto-deploys. This Vercel project does NOT
   enforce the Git-author check (unlike amber-mvp), so author email is not a
   blocker here, but the agreed workflow is still branch → PR → `sanite1` merges.
@@ -81,15 +87,18 @@ frontend: EFAW £550/session, FAW £1,500/session, up to 12 delegates, on-site.
 - Husky pre-commit runs prettier + `tsc`.
 
 ## Current PR status (1 Jun 2026)
+
 - **PR #44** — MERGED + live: the booking/enquiry endpoints + premium branded
   emails. Verified: `POST /api/contact/booking` returns 200 in production and
   emails arrive in the inbox.
 
 ## Still needed post-deploy
+
 - Nothing required on the backend. The booking endpoint and emails are live and
   tested. (Frontend has a `POST_DEPLOY_CHECKLIST.md` for GSC/GA4/Lighthouse.)
 
 ## Context for a future session
+
 - If the booking email design or fields change, edit
   `src/services/nodemailer/mail.service.ts` only; the frontend posts the field
   names listed under `BookingEnquiryPayload`.
