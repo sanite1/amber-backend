@@ -151,3 +151,23 @@ export const confirmationAllowed = async (
     return false;
   }
 };
+
+// Early warning: real bookings come a few a week, so 5 client confirmations in
+// one hour suggests a bot is using the forms. The inbox is told at most once an
+// hour; the plan for that case (a Cloudflare Turnstile check) is parked until
+// this fires.
+const CONFIRM_ALERT_AT = 5;
+
+/** The hour's confirmation count when an alert is due, otherwise null. */
+export const confirmationAlertDue = async (): Promise<number | null> => {
+  try {
+    const total = await RateLimitHit.countDocuments({ key: "confirm:all" });
+    if (total < CONFIRM_ALERT_AT) return null;
+    if (await RateLimitHit.countDocuments({ key: "alert:confirm" }))
+      return null;
+    await RateLimitHit.create({ key: "alert:confirm" });
+    return total;
+  } catch {
+    return null;
+  }
+};

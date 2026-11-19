@@ -1,7 +1,7 @@
 import ApiError from "../../errors/apiError";
 import transporter from "./nodemailer";
 import { REFRESHER_OFFER, poundsText } from "../refresherOffer";
-import { confirmationAllowed } from "../spamGuard";
+import { confirmationAllowed, confirmationAlertDue } from "../spamGuard";
 
 // B2B on-site training booking / quote request -> lands in the inbox.
 export interface BookingAttribution {
@@ -208,6 +208,36 @@ const spamBanner = (flags?: string[]) =>
 const spamPrefix = (flags?: string[]) =>
   flags && flags.length ? "[Possible spam] " : "";
 
+// Whether a client confirmation may go out now (spamGuard limits), and, when
+// the hour looks busier than real bookings ever are, one alert to the inbox.
+// The alert carries no visitor-typed text.
+type ConfirmKind = Parameters<typeof confirmationAllowed>[0];
+const mayConfirm = async (kind: ConfirmKind, email: string) => {
+  const allowed = await confirmationAllowed(kind, email);
+  const total = await confirmationAlertDue();
+  if (total !== null) {
+    console.warn(`confirmation alert: ${total} client confirmations this hour`);
+    try {
+      await transporter.sendMail({
+        from: `"Amber Training Website" <${process.env.AUTH_EMAIL}>`,
+        to: process.env.AUTH_EMAIL,
+        subject: "Website alert: unusual number of confirmation emails",
+        html: emailShell({
+          title: "Unusual number of confirmation emails",
+          preheader: `${total} client confirmations in the last hour`,
+          contentHtml: `
+      <p style="margin:0 0 16px;">The website has sent ${total} client confirmation emails in the last hour. Real bookings come a few a week, so a bot may be using the forms to send our emails to strangers.</p>
+      <p style="margin:0 0 16px;">Nothing is lost: every enquiry still reaches this inbox, and confirmations stop at 10 an hour.</p>
+      <p style="margin:0;"><strong>Action:</strong> ask Claude to build the parked Cloudflare Turnstile check (amber-seo STATUS.md, 19 Nov 2026).</p>`,
+        }),
+      });
+    } catch (error) {
+      console.error("confirmation alert email failed:", error);
+    }
+  }
+  return allowed;
+};
+
 // "How they found us": first-touch attribution captured on the website and
 // shown with every enquiry so ads and organic bookings are told apart at a
 // glance. Only the fields that exist are rendered; older or no-JS enquiries
@@ -343,7 +373,7 @@ export const sendBookingEnquiryMail = async (b: BookingEnquiryPayload) => {
   // request if this errors). Never for a submission flagged as possible spam,
   // so bots cannot use this to send mail to third parties.
   if (flagged) return true;
-  if (!(await confirmationAllowed("booking", b.email))) return true;
+  if (!(await mayConfirm("booking", b.email))) return true;
   try {
     await transporter.sendMail({
       from: `"Amber Training" <${process.env.AUTH_EMAIL}>`,
@@ -425,7 +455,7 @@ export const sendRefresherAddedMail = async (r: RefresherAddedPayload) => {
   });
 
   // Best-effort confirmation to the client.
-  if (!(await confirmationAllowed("refresher-added", r.email))) return true;
+  if (!(await mayConfirm("refresher-added", r.email))) return true;
   try {
     await transporter.sendMail({
       from: `"Amber Training" <${process.env.AUTH_EMAIL}>`,
@@ -500,7 +530,7 @@ export const sendRefresherRequestMail = async (r: RefresherRequestPayload) => {
     );
   }
   if (r.spamFlags && r.spamFlags.length) return true;
-  if (!(await confirmationAllowed("refresher-request", r.email))) return true;
+  if (!(await mayConfirm("refresher-request", r.email))) return true;
   try {
     await transporter.sendMail({
       from: `"Amber Training" <${process.env.AUTH_EMAIL}>`,
