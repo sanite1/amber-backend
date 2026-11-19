@@ -126,15 +126,19 @@ export const checkRateLimit = async (
 };
 
 /**
- * Whether a client confirmation may go to this address now: one per address
- * and ten in all per rolling hour, so the forms cannot be used to send a
- * stream of Amber emails to people who never asked for them. Fails closed:
+ * Whether a client confirmation may go to this address now: one of each kind
+ * per address and ten in all per rolling hour, so the forms cannot be used to
+ * send a stream of Amber emails to people who never asked for them. Per kind,
+ * so booking and then adding the refresher still sends both. Fails closed:
  * if the database is unavailable, no confirmation is sent (the enquiry still
  * reaches the inbox).
  */
-export const confirmationAllowed = async (email: string): Promise<boolean> => {
+export const confirmationAllowed = async (
+  kind: "booking" | "refresher-added" | "refresher-request",
+  email: string,
+): Promise<boolean> => {
   const keys: [string, number][] = [
-    [`confirm:${email.toLowerCase()}`, 1],
+    [`confirm:${kind}:${email.toLowerCase()}`, 1],
     ["confirm:all", 10],
   ];
   try {

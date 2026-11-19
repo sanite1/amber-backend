@@ -343,7 +343,7 @@ export const sendBookingEnquiryMail = async (b: BookingEnquiryPayload) => {
   // request if this errors). Never for a submission flagged as possible spam,
   // so bots cannot use this to send mail to third parties.
   if (flagged) return true;
-  if (!(await confirmationAllowed(b.email))) return true;
+  if (!(await confirmationAllowed("booking", b.email))) return true;
   try {
     await transporter.sendMail({
       from: `"Amber Training" <${process.env.AUTH_EMAIL}>`,
@@ -425,7 +425,7 @@ export const sendRefresherAddedMail = async (r: RefresherAddedPayload) => {
   });
 
   // Best-effort confirmation to the client.
-  if (!(await confirmationAllowed(r.email))) return true;
+  if (!(await confirmationAllowed("refresher-added", r.email))) return true;
   try {
     await transporter.sendMail({
       from: `"Amber Training" <${process.env.AUTH_EMAIL}>`,
@@ -500,7 +500,7 @@ export const sendRefresherRequestMail = async (r: RefresherRequestPayload) => {
     );
   }
   if (r.spamFlags && r.spamFlags.length) return true;
-  if (!(await confirmationAllowed(r.email))) return true;
+  if (!(await confirmationAllowed("refresher-request", r.email))) return true;
   try {
     await transporter.sendMail({
       from: `"Amber Training" <${process.env.AUTH_EMAIL}>`,
