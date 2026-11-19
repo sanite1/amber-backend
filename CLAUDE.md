@@ -42,6 +42,18 @@ frontend: EFAW £550/session, FAW £1,500/session, up to 12 delegates, on-site.
   Totals are read straight from MongoDB by an internal tool:
   `npx ts-node --transpile-only scripts/booking-card-summary.ts [days]`
   (uses `MONGODB_URI` from the local `.env`).
+- **`POST /api/metrics/contact-click`** (since 18 Nov 2026): the website sends
+  `{kind: "email"|"phone", channel, landing, from}` when a visitor clicks the
+  support@ email link (or a phone link), so an enquiry that arrives by email
+  can be matched by time to how the sender found the site. One `ContactClick`
+  record per click at minute resolution (London time kept too); allow-lists
+  in `src/services/contactClickMetrics.service.ts` (channel codes match
+  amber-mvp `lib/attribution.ts channelCode`); "unknown" when the visitor has
+  not allowed analytics storage. Same rules as the booking-card count: no IP,
+  user agent, cookie or identifier, always 204, rate limited, no read route.
+  Records expire after about 13 months. Read with
+  `npx ts-node --transpile-only scripts/contact-click-summary.ts [days]`, or
+  `... --before <ISO time>` for the clicks in the three hours before an email.
 
 ## Email design (brand)
 

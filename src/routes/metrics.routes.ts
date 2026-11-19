@@ -1,5 +1,8 @@
 import express from "express";
-import { recordBookingCardController } from "../controllers/metrics.controller";
+import {
+  recordBookingCardController,
+  recordContactClickController,
+} from "../controllers/metrics.controller";
 
 const router = express.Router();
 
@@ -15,7 +18,11 @@ const beaconText: express.RequestHandler = (req, res, next) =>
 // POST /api/metrics/booking-card  -> count a booking-card start or submit
 router.post("/booking-card", beaconText, recordBookingCardController);
 
-// Write-only: there is deliberately no read route. Totals are read straight
-// from the database by an internal tool (scripts/booking-card-summary.ts).
+// POST /api/metrics/contact-click  -> save a click on the email or phone link
+router.post("/contact-click", beaconText, recordContactClickController);
+
+// Write-only: there is deliberately no read route. Totals and clicks are read
+// straight from the database by internal tools (scripts/booking-card-summary.ts
+// and scripts/contact-click-summary.ts).
 
 export default router;
