@@ -20,7 +20,9 @@ const LIMIT_PER_EMAIL = 5;
 // The no-JavaScript booking path reaches us from the website's own server, so
 // many visitors share that connecting IP. It gets a higher ceiling, and the
 // visitor's own IP (forwarded by the website) is limited separately.
-const LIMIT_PER_SERVER_IP = 40;
+// The forwarded visitor IP cannot be verified, so this ceiling is what really
+// bounds that path: kept low, as real no-JavaScript bookings are rare.
+const LIMIT_PER_SERVER_IP = 10;
 
 export const clip = (v: unknown, max: number): string | undefined => {
   if (typeof v !== "string" && typeof v !== "number") return undefined;
@@ -121,4 +123,27 @@ export const checkRateLimit = async (
     );
   }
   return null;
+};
+
+/**
+ * Whether a client confirmation may go to this address now: one per address
+ * and ten in all per rolling hour, so the forms cannot be used to send a
+ * stream of Amber emails to people who never asked for them. Fails closed:
+ * if the database is unavailable, no confirmation is sent (the enquiry still
+ * reaches the inbox).
+ */
+export const confirmationAllowed = async (email: string): Promise<boolean> => {
+  const keys: [string, number][] = [
+    [`confirm:${email.toLowerCase()}`, 1],
+    ["confirm:all", 10],
+  ];
+  try {
+    for (const [key, limit] of keys) {
+      if ((await RateLimitHit.countDocuments({ key })) >= limit) return false;
+    }
+    await RateLimitHit.insertMany(keys.map(([key]) => ({ key })));
+    return true;
+  } catch {
+    return false;
+  }
 };

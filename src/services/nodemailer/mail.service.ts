@@ -1,6 +1,7 @@
 import ApiError from "../../errors/apiError";
 import transporter from "./nodemailer";
 import { REFRESHER_OFFER, poundsText } from "../refresherOffer";
+import { confirmationAllowed } from "../spamGuard";
 
 // B2B on-site training booking / quote request -> lands in the inbox.
 export interface BookingAttribution {
@@ -127,10 +128,18 @@ const ukDate = (v?: string) => {
 };
 
 // Client-facing date: "flexible" (the form's "To be confirmed") reads as such.
+// Client confirmations go to whatever address was typed into the form, so
+// they carry no visitor-typed text: only a real date or a band from the form's
+// own list, otherwise "To be confirmed".
 const clientDate = (v?: string) => {
   const s = (v || "").trim();
-  return !s || s === "flexible" ? "To be confirmed" : esc(ukDate(s));
+  return /^\d{4}-\d{2}-\d{2}$/.test(s) ? esc(ukDate(s)) : "To be confirmed";
 };
+const PEOPLE_BANDS = ["1 to 4", "5 to 8", "9 to 12", "13 or more"];
+const clientBand = (v?: string | number) =>
+  PEOPLE_BANDS.includes(String(v ?? "").trim())
+    ? String(v).trim()
+    : "To be confirmed";
 
 // A clean label/value row for the details table.
 const detailRow = (label: string, value: string) => `
@@ -334,6 +343,7 @@ export const sendBookingEnquiryMail = async (b: BookingEnquiryPayload) => {
   // request if this errors). Never for a submission flagged as possible spam,
   // so bots cannot use this to send mail to third parties.
   if (flagged) return true;
+  if (!(await confirmationAllowed(b.email))) return true;
   try {
     await transporter.sendMail({
       from: `"Amber Training" <${process.env.AUTH_EMAIL}>`,
@@ -344,13 +354,12 @@ export const sendBookingEnquiryMail = async (b: BookingEnquiryPayload) => {
         preheader:
           "Your agreement and invoice will be sent by email within one working day.",
         contentHtml: `
-          <p style="margin:0 0 16px;">Dear ${esc(b.contactName)},</p>
-          <p style="margin:0 0 20px;">Thank you for booking on-site first aid training for <strong>${esc(b.companyName)}</strong>. Your agreement and invoice will be sent by email <strong>within one working day</strong>. No payment until your booking is confirmed.</p>
+          <p style="margin:0 0 16px;">Hello,</p>
+          <p style="margin:0 0 20px;">Thank you for booking on-site first aid training with Amber Training. Your agreement and invoice will be sent by email <strong>within one working day</strong>. No payment until your booking is confirmed.</p>
           ${courseCard(b.courseType)}
           <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #efe9e1;border-radius:8px;overflow:hidden;margin:0 0 22px;">
-            ${detailRow("Number of delegates", esc(b.delegates) || "To be confirmed")}
+            ${detailRow("Number of delegates", clientBand(b.delegates))}
             ${detailRow("Preferred date", clientDate(b.preferredDates))}
-            ${detailRow("Venue", esc(b.venueAddress) || "To be confirmed")}
           </table>
           ${b.offerRef ? refresherOfferBlock(b.offerRef) : ""}
           <h2 style="margin:0 0 10px;font-family:${HEAD_FONT};color:${BRAND.secondary};font-size:17px;font-weight:700;">What happens next</h2>
@@ -416,6 +425,7 @@ export const sendRefresherAddedMail = async (r: RefresherAddedPayload) => {
   });
 
   // Best-effort confirmation to the client.
+  if (!(await confirmationAllowed(r.email))) return true;
   try {
     await transporter.sendMail({
       from: `"Amber Training" <${process.env.AUTH_EMAIL}>`,
@@ -425,8 +435,8 @@ export const sendRefresherAddedMail = async (r: RefresherAddedPayload) => {
         title: "Your annual refresher is added",
         preheader: `It will be on your invoice at ${price}.`,
         contentHtml: `
-          <p style="margin:0 0 16px;">Dear ${esc(r.contactName)},</p>
-          <p style="margin:0 0 16px;">Thank you. The ${esc(REFRESHER_OFFER.name)} is added to your booking for <strong>${esc(r.companyName)}</strong> at <strong>${esc(price)}</strong>, today's price.</p>
+          <p style="margin:0 0 16px;">Hello,</p>
+          <p style="margin:0 0 16px;">Thank you. The ${esc(REFRESHER_OFFER.name)} is added to your booking at <strong>${esc(price)}</strong>, today's price.</p>
           <p style="margin:0 0 16px;">It will be a separate line on your invoice. It is half a day at your venue, for up to 12 of your staff, about 12 months after your course. We will be in touch nearer the time to agree a date.</p>
           <p style="margin:0 0 18px;">If you would like to remove it, reply to this email any time before you pay the invoice.</p>
           <p style="margin:0;">Kind regards,<br/><strong>The Amber Training team</strong></p>
@@ -490,6 +500,7 @@ export const sendRefresherRequestMail = async (r: RefresherRequestPayload) => {
     );
   }
   if (r.spamFlags && r.spamFlags.length) return true;
+  if (!(await confirmationAllowed(r.email))) return true;
   try {
     await transporter.sendMail({
       from: `"Amber Training" <${process.env.AUTH_EMAIL}>`,
@@ -499,8 +510,8 @@ export const sendRefresherRequestMail = async (r: RefresherRequestPayload) => {
         title: "Thank you for your refresher request",
         preheader: `We will add the annual refresher to your booking at ${price}.`,
         contentHtml: `
-          <p style="margin:0 0 16px;">Dear ${esc(r.contactName)},</p>
-          <p style="margin:0 0 16px;">Thank you. We will add the ${esc(REFRESHER_OFFER.name)} to the booking for <strong>${esc(r.companyName)}</strong> at <strong>${esc(price)}</strong> and confirm by email within one working day.</p>
+          <p style="margin:0 0 16px;">Hello,</p>
+          <p style="margin:0 0 16px;">Thank you. We will add the ${esc(REFRESHER_OFFER.name)} to your booking at <strong>${esc(price)}</strong> and confirm by email within one working day.</p>
           <p style="margin:0 0 18px;">It is half a day at your venue, for up to 12 of your staff, about 12 months after your course. We will be in touch nearer the time to agree a date.</p>
           <p style="margin:0;">Kind regards,<br/><strong>The Amber Training team</strong></p>
         `,
